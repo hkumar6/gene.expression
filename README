@@ -1,0 +1,4 @@
+These code snippets deal with imputing dropouts in single cell gene-expression.
+Two approaches are currently considered
+-> LASSO regression
+-> k-nearest neighbour method
