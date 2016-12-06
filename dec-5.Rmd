@@ -1,0 +1,104 @@
+---
+title: "Imputing single-cell gene expression"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
+## Configure environment
+
+```{r env}
+# configure environment
+setwd("~/Code/comp-bio")
+load("~/Code/comp-bio/treutlein2016.rdata")
+library("kknn")
+library("ggplot2")
+```
+
+
+## Data subset for simulation
+
+Based on the average expression across cells, 500 most abundantly expressed genes are selected for the simulation. For the test data, we randomly select 5% of all the cells.
+
+```{r dataSubset}
+# select 500 most abundantly expressed genes
+means <- data.frame(rowMeans(expr))
+names(means) <- c("rowMeans")
+rownames(means)[order(means$rowMeans, decreasing = TRUE)[1:500]] -> selectedGenes
+sample(colnames(expr), 0.05*ncol(expr)) -> selectedCells
+
+
+# prepare data for simulation
+expr[selectedGenes, ] -> simData
+simData[, -which(colnames(simData) %in% selectedCells)] -> simData.learn
+simData[, selectedCells] -> simData.test
+```
+
+## Genes for simulation
+Three genes: "Actb", "Sod1" and "Gapdh" : were selected for the simulation.
+
+```{r geneCheck}
+"Actb" %in% selectedGenes
+"Sod1" %in% selectedGenes
+"Gapdh" %in% selectedGenes
+```
+
+## Determining optimal parameters
+
+```{r bestParam}
+# transpose the data for kknn library
+data.frame(t(simData.test)) -> simData.test
+data.frame(t(simData.learn)) -> simData.learn
+```
+
+## Simulation for Actb
+
+```{r actb}
+results <- train.kknn(Actb~., simData.learn, kmax=25, kernel = c("triangular", "rectangular", "epanechnikov", "optimal"), distance = 2)
+results
+plot(results)
+Actbtest <- simData.test
+Actbtest[,"Actb"] = 0
+simData.kknn <- kknn(Actb~., simData.learn, Actbtest, distance = 2, kernel = results$best.parameters$kernel, k = results$best.parameters$k)
+plotData <- data.frame(as.data.frame(expr["Actb", selectedCells], row.names = selectedCells), as.data.frame(simData.kknn$fitted.values, row.names = selectedCells))
+names(plotData) <- c("originalExpression", "fittedExpression")
+ggplot(plotData, aes(y=fittedExpression, x=originalExpression)) + geom_point(aes(color=fittedExpression)) + geom_line(aes(y=originalExpression))
+
+# mean squared error
+sum((plotData$originalExpression - plotData$fittedExpression)^2)/dim(plotData)[1]
+```
+
+## Simulation for Sod1
+
+```{r sod1}
+results <- train.kknn(Sod1~., simData.learn, kmax=25, kernel = c("triangular", "rectangular", "epanechnikov", "optimal"), distance = 2)
+results
+plot(results)
+Sod1test <- simData.test
+Sod1test[,"Sod1"] = 0
+simData.kknn <- kknn(Sod1~., simData.learn, Sod1test, distance = 2, kernel = results$best.parameters$kernel, k = results$best.parameters$k)
+plotData <- data.frame(as.data.frame(expr["Sod1", selectedCells], row.names = selectedCells), as.data.frame(simData.kknn$fitted.values, row.names = selectedCells))
+names(plotData) <- c("originalExpression", "fittedExpression")
+ggplot(plotData, aes(y=fittedExpression, x=originalExpression)) + geom_point(aes(color=fittedExpression)) + geom_line(aes(y=originalExpression))
+
+# mean squared error
+sum((plotData$originalExpression - plotData$fittedExpression)^2)/dim(plotData)[1]
+```
+
+## Simulation for Gapdh
+
+```{r gapdh}
+results <- train.kknn(Gapdh~., simData.learn, kmax=25, kernel = c("triangular", "rectangular", "epanechnikov", "optimal"), distance = 2)
+results
+plot(results)
+Gapdhtest <- simData.test
+Gapdhtest[,"Gapdh"] = 0
+simData.kknn <- kknn(Gapdh~., simData.learn, Gapdhtest, distance = 2, kernel = results$best.parameters$kernel, k = results$best.parameters$k)
+plotData <- data.frame(as.data.frame(expr["Gapdh", selectedCells], row.names = selectedCells), as.data.frame(simData.kknn$fitted.values, row.names = selectedCells))
+names(plotData) <- c("originalExpression", "fittedExpression")
+ggplot(plotData, aes(y=fittedExpression, x=originalExpression)) + geom_point(aes(color=fittedExpression)) + geom_line(aes(y=originalExpression))
+
+# mean squared error
+sum((plotData$originalExpression - plotData$fittedExpression)^2)/dim(plotData)[1]
+```
