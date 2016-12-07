@@ -26,10 +26,10 @@ LASSO <- function(gene){
   return(result)
 }
 
-result <- apply(Ntexpr,2, LASSO)
+result <- apply(Ntexpr,2, LASSO) #list of the results
 
-mse <- unlist(lapply(result, function(x) x$mse))
-unlist(lapply(result, function(x) x$number.cov))
+mse <- unlist(lapply(result, function(x) x$mse)) #extracting mse for all genes
+cov <- unlist(lapply(result, function(x) x$number.cov))
 
 Pred_gene <- do.call(cbind, lapply(result, function(x) x$predicted))
 colnames(Pred_gene) <- colnames(Ntexpr)
@@ -37,5 +37,4 @@ colnames(Pred_gene) <- colnames(Ntexpr)
 Real_gene <- do.call(cbind, lapply(result, function(x) x$real))
 colnames(Real_gene) <- colnames(Ntexpr)
 
-cov <- unlist(lapply(result, function(x) x$number.cov))
 
