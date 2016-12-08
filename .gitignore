@@ -6,3 +6,4 @@
 *.Ruserdata
 reports/*.pdf
 data/*
+.DS_Store
