@@ -33,7 +33,6 @@ LASSO <- function(geneID){
   return(result)
 }
 
-mapply(LASSO,selectedGenes[1:2])
 
 LASSOImputeAllGenes <- function(){
   genes <- mapply(LASSO,selectedGenes)
