@@ -9,6 +9,10 @@ expr[selectedGenes, ] -> simData
 simData[, -which(colnames(simData) %in% selectedCells)] -> simData.learn
 simData[, selectedCells] -> simData.test
 
-# transpose the data for kknn library
-data.frame(t(simData.test)) -> simData.test
-data.frame(t(simData.learn)) -> simData.learn
+# transpose the data for glmnet library
+t(simData.test) -> simData.test
+t(simData.learn) -> simData.learn
+
+# transpose as data.frame for kknn library
+data.frame(simData.test) -> kknn.simData.test
+data.frame(simData.learn) -> kknn.simData.learn
