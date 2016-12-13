@@ -2,7 +2,7 @@
 kknnImputeGene <- function(geneID) {
   trainingInfo <- train.kknn(as.formula(paste(geneID, ".", sep = "~")), kknn.simData.learn, kmax=40, kernel = c("triangular", "rectangular", "epanechnikov", "optimal"), distance = 2)
   r <- kknn(as.formula(paste(geneID, ".", sep = "~")), kknn.simData.learn, kknn.simData.test, distance = 2, kernel = trainingInfo$best.parameters$kernel, k = trainingInfo$best.parameters$k)
-  mse <- sum((kknn.simData.test[geneID]-r$fitted.values)^2)/dim(simData.test[geneID])[1]
+  mse <- sum((kknn.simData.test[geneID]-r$fitted.values)^2)/(dim(simData.test[geneID])[1])
   
   x <- kknn.simData.test[geneID]
   x$predicted = r$fitted.values
