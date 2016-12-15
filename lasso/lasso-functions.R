@@ -10,7 +10,7 @@ LASSO <- function(ID){
   c <- rcorr(predicted,vec.test, type = "spearman")
   Spear_corr <- c$r[1,2]
   cov <- sum(coef(fit.expr, CV.expr$lambda.min)>0)
-  result <- list(mse = mse, Spear_corr = Spear_corr, number.cov = cov)
+  result <- data.frame(mse = mse, Spear_corr = Spear_corr, number.cov = cov)
   return(result)
 }
 
