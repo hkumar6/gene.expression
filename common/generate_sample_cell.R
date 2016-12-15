@@ -6,7 +6,7 @@ expr[selectedGenesforSim, ] -> simData
 sample(rownames(simData), 0.05*nrow(simData)) -> selectedGenes
 
 # prepare data for simulation
-simData[-which(rownames(simData) %in% selectedGenes),] -> simData.learn
+simData[-c(which(rownames(simData) %in% selectedGenes)),] -> simData.learn
 simData[selectedGenes,] -> simData.test
 
 # transform to data.frame for kknn library
