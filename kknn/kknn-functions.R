@@ -7,7 +7,7 @@ kknnImputeGene <- function(geneID, simData.learn, simData.test) {
   x <- simData.test[geneID]
   x$predicted = r$fitted.values
   c <- rcorr(as.matrix(x), type = "spearman")
-  outputList <- list(mse = mse, Spear_corr = c$r[1,2],
+  outputList <- data.frame(mse = mse, Spear_corr = c$r[1,2],
                      optimalK = trainingInfo$best.parameters$k,
                      optimalKernel = trainingInfo$best.parameter$kernel)
   return(outputList)
