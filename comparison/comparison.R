@@ -21,12 +21,3 @@ for (i in 5:25){
   genes.perc2 <- rbind(genes.perc2,genes2)
   
 }
-
-
-
-
-
-
-
-
-
