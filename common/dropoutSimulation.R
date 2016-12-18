@@ -34,7 +34,17 @@ setMethod(f = "simulateDropoutGene",
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
                 sample(colnames(theObject@data.good), p*ncol(theObject@data.good)) -> local.selectedCells
-                td <- mapply(kknnImputeGene, local.selectedGenes[1:3],
+                
+                # simulation for lasso
+                td <- mapply(lassoImpute, local.selectedGenes[1:3],
+                             MoreArgs = list(as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])), 
+                                             as.matrix(t(local.simData[, local.selectedCells]))))
+                theObject@simulation.result[[length(theObject@simulation.result)+1]] <- td
+                attr(theObject@simulation.result[[length(theObject@simulation.result)]], "drop-percentage") <- p
+                attr(theObject@simulation.result[[length(theObject@simulation.result)]], "method") <- "lasso"
+                
+                # simulation for kknn
+                td <- mapply(kknnImpute, local.selectedGenes[1:3],
                              MoreArgs = list(as.data.frame(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
                                              as.data.frame(t(local.simData[, local.selectedCells]))))
                 theObject@simulation.result[[length(theObject@simulation.result)+1]] <- td

@@ -1,4 +1,4 @@
-LASSO <- function(ID){
+lassoImpute <- function(ID, simData.learn, simData.test){
   simData_learn <- simData.learn[,-c(which(colnames(simData.learn) == ID))]
   simData_test <- simData.test[,-c(which(colnames(simData.test) == ID))]
   vec.learn <- simData.learn[,which(colnames(simData.learn) == ID)]
@@ -14,7 +14,7 @@ LASSO <- function(ID){
   return(result)
 }
 
-
+# TODO
 LASSOImputeAllGenes <- function(){
   genes <- mapply(LASSO,selectedGenes)
   return(genes)
