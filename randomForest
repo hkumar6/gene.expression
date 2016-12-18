@@ -21,8 +21,8 @@ selectedCells = sample(colnames(expr), 0.10*ncol(expr)) #0.10 then, 0.20, ....,0
 
 # prepare data for simulation
 expr[selectedGenes ] -> simData
-simData[, -which(colnames(simData) %in% selectedCells)] -> simData.learn
-simData[, selectedCells] -> simData.test
+simData[ -which(colnames(simData) %in% selectedCells)] -> simData.learn
+simData[ selectedCells] -> simData.test
 
 
 # transpose the data for kknn library
