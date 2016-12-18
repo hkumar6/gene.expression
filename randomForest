@@ -6,7 +6,7 @@
 setwd("~/documents/progetto_biocomputazionale")
 # upload dataset
 load("~/documents/progetto_biocomputazionale/treutlein2016.rdata")
-#instal kknn with install.packages("randomForest")
+#instal randomforest with install.packages("randomForest")
 library("randomForest")
 # Load the party package. install.packages("party") It will automatically load other required packages.
 library(party)
