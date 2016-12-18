@@ -6,7 +6,7 @@
 setwd("~/documents/progetto_biocomputazionale")
 # upload dataset
 load("~/documents/progetto_biocomputazionale/treutlein2016.rdata")
-#instal randomforest with install.packages("randomForest")
+#instal kknn with install.packages("randomForest")
 library("randomForest")
 # Load the party package. install.packages("party") It will automatically load other required packages.
 library(party)
@@ -14,13 +14,13 @@ library(party)
 library("ggplot2")
 # prepare data for simulation
 # prepare data for simulation
-dataRows=data.frame(row(expr))
-names(dataRows) = c("row")
-selectedGenes = rownames(dataRows)[order(dataRows$row, decreasing = TRUE)[1:500]] 
-selectedCells = sample(colnames(expr), 0.05*ncol(expr)) #0.10 then, 0.20, ....,0.70
+dataMatrix=data.frame(matrix(expr))
+names(dataMatrix) = c("matrix")
+selectedGenes = rownames(dataMatrix)[order(dataMatrix$matrix, decreasing = TRUE)[1:22524]] 
+selectedCells = sample(colnames(expr), 0.10*ncol(expr)) #0.10 then, 0.20, ....,0.70
 
 # prepare data for simulation
-expr[selectedGenes, ] -> simData
+expr[selectedGenes ] -> simData
 simData[, -which(colnames(simData) %in% selectedCells)] -> simData.learn
 simData[, selectedCells] -> simData.test
 
