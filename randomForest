@@ -30,7 +30,8 @@ simData[ selectedCells] -> simData.test
 data.frame(t(simData.test)) -> simData.test
 data.frame(t(simData.learn)) -> simData.learn
 
-#Gapdh graphs
+#built predictive model
 fit <- randomForest(formula=expr ~ ., data=simData.test, importance=TRUE, ntree=2000)
+
 
 
