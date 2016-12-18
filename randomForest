@@ -6,7 +6,7 @@
 setwd("~/documents/progetto_biocomputazionale")
 # upload dataset
 load("~/documents/progetto_biocomputazionale/treutlein2016.rdata")
-#instal kknn with install.packages("randomForest")
+#instal randomForest with install.packages("randomForest")
 library("randomForest")
 # Load the party package. install.packages("party") It will automatically load other required packages.
 library(party)
@@ -31,7 +31,8 @@ data.frame(t(simData.test)) -> simData.test
 data.frame(t(simData.learn)) -> simData.learn
 
 #built predictive model
-fit <- randomForest(formula=expr ~ ., data=simData.test, importance=TRUE, ntree=2000)
+fit <- randomForest(expr ~ ., formula=as.formula(Gadph), data=expr, ntree=2000, ntry=10)
+#fit <- randomForest(Gapdh ~ ., data=expr,importance=TRUE,proximity=TRUE, ntree=2000, ntry=10)
 
 
 
