@@ -25,9 +25,12 @@ simData[ -which(colnames(simData) %in% selectedCells)] -> simData.learn
 simData[ selectedCells] -> simData.test
 
 
-# transpose the data for kknn library
+
+# transpose the data for randomForest library
 data.frame(t(simData.test)) -> simData.test
 data.frame(t(simData.learn)) -> simData.learn
 
 #Gapdh graphs
-fit <- randomForest(expr ~ ., data=simData.test, importance=TRUE, ntree=2000)
+fit <- randomForest(formula=expr ~ ., data=simData.test, importance=TRUE, ntree=2000)
+
+
