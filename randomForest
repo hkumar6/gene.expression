@@ -35,3 +35,28 @@ fit <- randomForest(formula=expr ~ ., data=simData.test, importance=TRUE, ntree=
 
 
 
+
+
+
+
+
+
+
+model <- randomForest(taste ~ . - quality, data = train)
+
+
+
+# transpose the data for randomForest library
+
+
+
+
+
+#predict.randomForest predict method for random forest objects
+#Description
+#Prediction of test data using random forest.
+#Usage
+## S3 method for class  randomForest 
+predict(object, newdata, type="response",
+        norm.votes=TRUE, predict.all=FALSE, proximity=FALSE, nodes=FALSE,
+        cutoff, ...)
