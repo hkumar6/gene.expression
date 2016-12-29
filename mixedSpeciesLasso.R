@@ -21,7 +21,7 @@ lasso.mixed.data <- function(ID,simData){
   if (dim(simData_learn)[1]>1){
     fit.expr.lin <- glmnet(x = log(1+simData_learn), y = log(1+vec.learn),
                            family = "gaussian", standardize = TRUE, alpha = 1)
-  if (n>10){
+  if (n>=9){
     cv.expr.lin <- cv.glmnet(x = log(1+simData_learn), y = log(1+vec.learn), nfold=3, type.measure="mse")
     prediction <- predict(fit.expr.lin, newx = log(1+simData_test), s = c(cv.expr.lin$lambda.min))
     cov <- sum(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)
