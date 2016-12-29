@@ -19,31 +19,33 @@ lasso.mixed.data <- function(ID,simData){
   n = dim(simData_learn)[1]
   n1 = length(vec.test)
   if (dim(simData_learn)[1]>1){
-    fit.expr.lin <- glmnet(x = log(1+simData_learn), y = log(1+vec.learn),
+    x=simData_learn
+    fit.expr.lin <- glmnet(x, y = log(1+vec.learn),
                            family = "gaussian", standardize = TRUE, alpha = 1)
+  }else{
+    mse.lin = NaN
+    Spear_corr = NaN
+    cov = NaN
+  }
   if (n>=9){
-    cv.expr.lin <- cv.glmnet(x = log(1+simData_learn), y = log(1+vec.learn), nfold=3, type.measure="mse")
-    prediction <- predict(fit.expr.lin, newx = log(1+simData_test), s = c(cv.expr.lin$lambda.min))
+    cv.expr.lin <- cv.glmnet(x, y = log(1+vec.learn), nfold=3, type.measure="mse")
+    prediction <- predict(fit.expr.lin, newx = simData_test, s = c(cv.expr.lin$lambda.min))
+    prediction2 <- exp(prediction)-1
     cov <- sum(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)
   } else {
-    prediction.lin <- predict(fit.expr.lin, newx = log(1+simData_test))
-    test <- apply(prediction.lin,2,function(x) mean((vec.test - (exp(x)-1))^2))
-    prediction <- prediction.lin[,which(test == min(test))[1]]
+    prediction.lin <- predict(fit.expr.lin, newx = simData_test)
+    test <- apply(prediction.lin,2,function(x) mean(((exp(x)-1))^2))
+    prediction <- prediction.lin[,which(test == min(test))[1]]}
     if (is.na(fit.expr.lin$lambda)[1]){
       cov = NaN
     } else {
-    cov <- sum(coef(fit.expr.lin, s = which(test == min(test))[1])>0) }
+      j  <- which(test == min(test))[1]
+    cov <- sum(coef(fit.expr.lin, s = fit.expr.lin$lambda[j])!=0) }
   
-  mse.lin <- mean((vec.test - (exp(prediction)-1))^2)
-  c <- rcorr((exp(prediction)-1),vec.test, type = "spearman")
-  Spear_corr <- c$r[1,2]}
-  }else{
-      mse.lin = NaN
-      Spear_corr = NaN
-      cov = NaN
-    }
+  mse.lin <- mean(((exp(prediction)-1))^2)
   
-  result <- data.frame(mse = mse.lin, Spear_corr = Spear_corr, number.cov = cov, nonzero = n,length.test = n1)
+  
+  result <- data.frame(mse = mse.lin, number.cov = cov, nonzero = n,length.test = n1)
   return(result)
 }
 
