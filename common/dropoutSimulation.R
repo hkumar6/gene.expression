@@ -72,8 +72,7 @@ setMethod(f = "simulateDropoutCells",
             names(local.means) <- c("rowMeans")
             rownames(local.means)[order(local.means$rowMeans, decreasing = TRUE)[1:500]] -> local.selectedGenes
             expr[local.selectedGenes, ] -> local.simData
-            colnames(local.simData) <- gsub("^1", "X", colnames(local.simData), perl = TRUE)
-            colnames(local.simData) <- gsub("_", "", colnames(local.simData), perl = TRUE)
+            colnames(local.simData) <- gsub("[_?]", "", gsub("^[0-9]", "X", colnames(local.simData), perl = TRUE), perl = TRUE)
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
                 sample(rownames(local.simData), p*nrow(local.simData)) -> local.dropoutGenes
