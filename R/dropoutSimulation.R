@@ -1,4 +1,19 @@
-# Class definition to store results for simulation
+#' The DropoutSimulation class
+#' 
+#' This class has slots to store results of different simulations
+#' using Lasso and kknn methods.
+#' 
+#' @slot dropout.percentage Vector containing values between 0 and 1
+#'  representing the percentages of dropout to simulate over repitions
+#' @slot n an integer specifying the number of repititions for
+#'  a particular dropout percentage
+#' @slot simulation.result.genes a list storing results of all simulations
+#'  where genes are imputed as function of cells
+#' @slot simulation.result.cells a list storing results of all simulations
+#'  where cells are imputed as functions of genes
+#'  
+#' @importFrom methods new
+#' @exportClass DropoutSimulation
 
 DropoutSimulation <- setClass("DropoutSimulation",
                               slots = 
@@ -30,7 +45,7 @@ setMethod(f = "simulateDropoutGene",
             local.means <- data.frame(rowMeans(expressionData))
             names(local.means) <- c("rowMeans")
             rownames(local.means)[order(local.means$rowMeans, decreasing = TRUE)[1:500]] -> local.selectedGenes
-            expr[local.selectedGenes, ] -> local.simData
+            expressionData[local.selectedGenes, ] -> local.simData
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
                 sample(colnames(expressionData), p*ncol(expressionData)) -> local.selectedCells
@@ -71,7 +86,7 @@ setMethod(f = "simulateDropoutCells",
             local.means <- data.frame(rowMeans(expressionData))
             names(local.means) <- c("rowMeans")
             rownames(local.means)[order(local.means$rowMeans, decreasing = TRUE)[1:500]] -> local.selectedGenes
-            expr[local.selectedGenes, ] -> local.simData
+            expressionData[local.selectedGenes, ] -> local.simData
             colnames(local.simData) <- gsub("[_?]", "", gsub("^[0-9]", "X", colnames(local.simData), perl = TRUE), perl = TRUE)
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
