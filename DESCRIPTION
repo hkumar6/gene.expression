@@ -1,0 +1,22 @@
+Package: gene.expression
+Title: Imputing dropouts in gene expression
+Version: 1.0
+Author: Kumar Harsha, Maria Mircea
+Maintainer: Kumar Harsha <kumar.harsha@tum.de>
+Description: This package contains utilities to study dropouts in gene
+    expression in single cells using the LASSO and k-nearest neighbour approach.
+License: GPL-2
+Namespace: gene.expression
+Depends:
+    R (>= 3.2.0)
+Imports:
+    methods,
+    Hmisc,
+    glmnet,
+    kknn
+Collate:
+    'kknn-functions.R'
+    'lasso-functions.R'
+    'dropoutSimulation.R'
+RoxygenNote: 5.0.1
+LazyData: true
