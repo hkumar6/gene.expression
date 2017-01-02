@@ -2,8 +2,8 @@ library(glmnet)
 library(Hmisc)
 
 # reduce randomly gene dimension by 50%
-sample(rownames(mixedSpeciesdata), 0.5*nrow(mixedSpeciesdata)) -> selectedGenes
-simData <- mixedSpeciesdata[selectedGenes,]
+sample(rownames(mixedSpecies100), 0.5*nrow(mixedSpecies100)) -> selectedGenes
+simData <- mixedSpecies100[selectedGenes,]
 
 #use simData for analysis of cells
 #use t(simData) for analysis of genes
@@ -43,12 +43,12 @@ lasso.mixed.data <- function(ID,simData){
   } else { # if there are less than 9 non zero entries compare results with mse
     prediction.lin <- predict(fit.expr.lin, newx = simData_test)
     test <- apply(prediction.lin,2,function(x) mean(((exp(x)-1))^2))
-    prediction <- prediction.lin[,which(test == min(test))[1]]}
+    prediction <- prediction.lin[,which(test == min(test))[1]]
     if (is.na(fit.expr.lin$lambda)[1]){
       cov = NaN
     } else {
       j  <- which(test == min(test))[1]
-    cov <- sum(coef(fit.expr.lin, s = fit.expr.lin$lambda[j])!=0) }
+    cov <- sum(coef(fit.expr.lin, s = fit.expr.lin$lambda[j])!=0) }}
   
   mse.lin <- mean(((exp(prediction)-1))^2)
   
@@ -57,7 +57,7 @@ lasso.mixed.data <- function(ID,simData){
   return(result)
 }
 
-ID <- colnames(simData)[700:710]
+ID <- colnames(simData)[1:3]
 
 result <- mapply(lasso.mixed.data,ID,MoreArgs = list(simData))
 result
