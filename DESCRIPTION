@@ -18,6 +18,8 @@ Imports:
 Collate:
     'kknn-functions.R'
     'lasso-functions.R'
+    'mixedSpeciesLasso.R'
     'dropoutSimulation.R'
+    'mixedSpeciesImput.R'
 RoxygenNote: 5.0.1
 LazyData: true
