@@ -12,6 +12,8 @@
 #' @slot simulation.result.cells a list storing results of all simulations
 #'  where cells are imputed as functions of genes
 #'  
+#' @name DropoutSimulation
+#' @rdname DropoutSimulation
 #' @importFrom methods new
 #' @exportClass DropoutSimulation
 
@@ -29,12 +31,25 @@ DropoutSimulation <- setClass("DropoutSimulation",
                               ))
 
 
-# method to run simulations on genes with dependency on cells
+#' Simulations on genes with dependency on cells
+#' 
+#' @param theObject an object of the DropoutSimulation class
+#' @param expressionData the data matrix containing gene expression values,
+#'  genes as rows and cells as columns
+#' @param dropoutPercentage a vector specifying dropout percentages to simulate
+#' @param n the number of simulations for each dropout
+#' 
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @exportMethod simulateDropoutGene
 setGeneric(name = "simulateDropoutGene",
            def = function(theObject, expressionData, dropoutPercentage, n) {
              standardGeneric("simulateDropoutGene")
            })
 
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @export
 setMethod(f = "simulateDropoutGene",
           signature = "DropoutSimulation",
           definition = function(theObject, expressionData, dropoutPercentage, n) {
@@ -70,12 +85,25 @@ setMethod(f = "simulateDropoutGene",
             return(theObject)
           })
 
-# method to run simulations on cells with dependency on genes
+#' Simulations on cells with dependency on genes
+#' 
+#' @param theObject an object of the DropoutSimulation class
+#' @param expressionData the data matrix containing gene expression values,
+#'  genes as rows and cells as columns
+#' @param dropoutPercentage a vector specifying dropout percentages to simulate
+#' @param n the number of simulations for each dropout
+#' 
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @exportMethod simulateDropoutCells
 setGeneric(name = "simulateDropoutCells",
            def = function(theObject, expressionData, dropoutPercentage, n) {
              standardGeneric("simulateDropoutCells")
            })
 
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @export
 setMethod(f = "simulateDropoutCells",
           signature = "DropoutSimulation",
           definition = function(theObject, expressionData, dropoutPercentage, n) {
@@ -109,4 +137,53 @@ setMethod(f = "simulateDropoutCells",
               }
             }
             return(theObject)
+          })
+
+#' Analysis of simulation results
+#' 
+#' This function plots graphs to help analyse between lasso and knn approaches.
+#' 
+#' @param theObject an object of the DropoutSimulation class containing simulation results
+#' @param type the type of graph to plot, "compare" will plot difference of mse(also the default value)
+#' @param p the dropout percentage to plot, default: 0 will consider the whole range
+#' 
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @importFrom ggplot2 ggplot aes labs geom_density
+#' @exportMethod plot
+setGeneric(name = "plot",
+           def = function(theObject, type = "compare", p = 0) {
+             standardGeneric("plot")
+           })
+
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @export
+setMethod(f = "plot",
+          signature = "DropoutSimulation",
+          definition = function(theObject, type = "compare", p = 0){
+            
+            # plot type 1
+            # comparison over all dropout percentages
+            if(type == "compare"){
+              plotData <- vector()
+              for(i in seq(1, length(theObject@simulation.result.cells)-1, by=2)) {
+                if(attr(theObject@simulation.result.cells[[i]], "drop-percentage") == p || 0 == p) {
+                  plotData <- c(plotData,
+                                mapply('-',
+                                       theObject@simulation.result.cells[[i]]["mse",],
+                                       theObject@simulation.result.cells[[i+1]]["mse",]))
+                }
+              }
+              pd <- as.data.frame(plotData)
+              plotObject <- ggplot(pd, aes(plotData)) + geom_density()
+              if(0 == p){
+                plotObject <- plotObject + labs(title = "MSE differences (lasso-knn) over all simulations", x = "mse(lasso)-mse(knn)")
+              } else {
+                plotObject <- plotObject + labs(title = paste("MSE differences (lasso-knn) over", p, "dropout"), x = "mse(lasso)-mse(knn)")
+              }
+              return(plotObject)
+            } else {
+                stop("Invalid parameters specified")
+            }
           })
