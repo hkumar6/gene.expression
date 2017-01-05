@@ -1,9 +1,9 @@
-library(glmnet)
-library(Hmisc)
+#library(glmnet)
+#library(Hmisc)
 
 # reduce randomly gene dimension by 50%
-sample(rownames(mixedSpecies100), 0.5*nrow(mixedSpecies100)) -> selectedGenes
-simData <- mixedSpecies100[selectedGenes,]
+#sample(rownames(mixedSpecies100), 0.5*nrow(mixedSpecies100)) -> selectedGenes
+#simData <- mixedSpecies100[selectedGenes,]
 
 #use simData for analysis of cells
 #use t(simData) for analysis of genes
