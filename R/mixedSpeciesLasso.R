@@ -57,11 +57,4 @@ lasso.mixed.data <- function(ID,simData){
   return(result)
 }
 
-ID <- colnames(simData)[1:3]
-
-result <- mapply(lasso.mixed.data,ID,MoreArgs = list(simData))
-result
-
-
-
 
