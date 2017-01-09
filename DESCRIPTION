@@ -19,6 +19,7 @@ Collate:
     'kknn-functions.R'
     'lasso-functions.R'
     'mixedSpeciesLasso.R'
+    'mixedSpeciesKknn.R'
     'dropoutSimulation.R'
     'mixedSpeciesImput.R'
 RoxygenNote: 5.0.1
