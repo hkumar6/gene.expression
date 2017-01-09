@@ -1,7 +1,7 @@
 #library(glmnet)
 #library(Hmisc)
 
-# reduce randomly gene dimension by 50%
+#reduce randomly gene dimension by 50%
 #sample(rownames(mixedSpecies100), 0.5*nrow(mixedSpecies100)) -> selectedGenes
 #simData <- mixedSpecies100[selectedGenes,]
 
@@ -30,11 +30,7 @@ lasso.mixed.data <- function(ID,simData){
     x=simData_learn
     fit.expr.lin <- glmnet(x, y = log(1+vec.learn),
                            family = "gaussian", standardize = TRUE, alpha = 1)
-  }else{
-    mse.lin = NaN
-    Spear_corr = NaN
-    cov = NaN
-  }
+  
   if (n>=9){ # if there are more than 9 non zero entries cross-validation is possible
     cv.expr.lin <- cv.glmnet(x, y = log(1+vec.learn), nfold=3, type.measure="mse")
     prediction <- predict(fit.expr.lin, newx = simData_test, s = c(cv.expr.lin$lambda.min))
@@ -51,7 +47,11 @@ lasso.mixed.data <- function(ID,simData){
     cov <- sum(coef(fit.expr.lin, s = fit.expr.lin$lambda[j])!=0) }}
   
   mse.lin <- mean(((exp(prediction)-1))^2)
-  
+  }else{
+    mse.lin = NaN
+    Spear_corr = NaN
+    cov = NaN
+  }
   
   result <- data.frame(mse = mse.lin, number.cov = cov, nonzero = n)
   return(result)
