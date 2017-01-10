@@ -1,9 +1,22 @@
 #library(glmnet)
 #library(Hmisc)
+#mixedSpeciesdata <- mixedSpecies100
 
-#reduce randomly gene dimension by 50%
-#sample(rownames(mixedSpecies100), 0.5*nrow(mixedSpecies100)) -> selectedGenes
-#simData <- mixedSpecies100[selectedGenes,]
+#human.simData <- mixedSpeciesdata[grep("HUMAN",rownames(mixedSpeciesdata)),]
+#mouse.simData <- mixedSpeciesdata[grep("MOUSE",rownames(mixedSpeciesdata)),]
+
+#local.means.human <- data.frame(rowMeans(human.simData))
+#names(local.means.human) <- c("rowMeans")
+#rownames(local.means.human)[order(local.means.human$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.human
+#local.means.mouse <- data.frame(rowMeans(mouse.simData))
+#names(local.means.mouse) <- c("rowMeans")
+#rownames(local.means.mouse)[order(local.means.mouse$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.mouse
+
+#simData.human <- mixedSpeciesdata[selectedGenes.human,]
+#simData.mouse <- mixedSpeciesdata[selectedGenes.mouse,]
+
+#simData <- rbind(simData.human,simData.mouse)
+
 
 #use simData for analysis of cells
 #use t(simData) for analysis of genes
@@ -26,13 +39,12 @@ lasso.mixed.data <- function(ID,simData){
   vec.learn <- simData.learn[,which(colnames(simData.learn)==ID)]
   vec.test <- simData.test[,which(colnames(simData.test)==ID)]
   n = dim(simData_learn)[1] # number of non-zero entries
-  if (dim(simData_learn)[1]>1){ #if there is more than one entry non zero do regression
-    x=simData_learn
-    fit.expr.lin <- glmnet(x, y = log(1+vec.learn),
+  if (dim(simData_learn)[1]>2){ #if there is more than one entry non zero do regression
+    fit.expr.lin <- glmnet(x = simData_learn, y = log(1+vec.learn),
                            family = "gaussian", standardize = TRUE, alpha = 1)
   
-  if (n>=9){ # if there are more than 9 non zero entries cross-validation is possible
-    cv.expr.lin <- cv.glmnet(x, y = log(1+vec.learn), nfold=3, type.measure="mse")
+  if (n>=12){ # if there are more than 9 non zero entries cross-validation is possible
+    cv.expr.lin <- cv.glmnet(x=simData_learn, y = log(1+vec.learn), nfold=3, type.measure="mse")
     prediction <- predict(fit.expr.lin, newx = simData_test, s = c(cv.expr.lin$lambda.min))
     prediction2 <- exp(prediction)-1
     cov <- sum(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)
@@ -57,4 +69,4 @@ lasso.mixed.data <- function(ID,simData){
   return(result)
 }
 
-
+#resultgenes <- mapply(lasso.mixed.data, rownames(simData), MoreArgs = list(t(simData)))
