@@ -33,12 +33,24 @@ setMethod(f = "mixedSpeciesGene",
           signature = "mixedSpeciesImput",
           definition = function(theObject, mixedSpeciesdata) {
             
-            # reduce randomly gene dimension by 50%
-            sample(rownames(mixedSpeciesdata), 0.5*nrow(mixedSpeciesdata)) -> selectedGenes
-            simData <- mixedSpeciesdata[selectedGenes,]
+            # reduce gene dimension to 100 mouse and 100 human genes with the highest gene expression
+            human.simData <- mixedSpeciesdata[grep("HUMAN",rownames(mixedSpeciesdata)),]
+            mouse.simData <- mixedSpeciesdata[grep("MOUSE",rownames(mixedSpeciesdata)),]
             
+            local.means.human <- data.frame(rowMeans(human.simData))
+            names(local.means.human) <- c("rowMeans")
+            rownames(local.means.human)[order(local.means.human$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.human
+            local.means.mouse <- data.frame(rowMeans(mouse.simData))
+            names(local.means.mouse) <- c("rowMeans")
+            rownames(local.means.mouse)[order(local.means.mouse$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.mouse
+            
+            simData.human <- mixedSpeciesdata[selectedGenes.human,]
+            simData.mouse <- mixedSpeciesdata[selectedGenes.mouse,]
+            
+            simData <- rbind(simData.human,simData.mouse)
+
             # simulation for lasso
-            td <- mapply(lasso.mixed.data, rownames(simData)[1:3],
+            td <- mapply(lasso.mixed.data, rownames(simData),
                          MoreArgs = list(t(simData)))
             theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
             attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "lasso"
@@ -59,12 +71,24 @@ setMethod(f = "mixedSpeciesCells",
           signature = "mixedSpeciesImput",
           definition = function(theObject, mixedSpeciesdata) {
             
-            # reduce randomly gene dimension by 50%
-            sample(rownames(mixedSpeciesdata), 0.5*nrow(mixedSpeciesdata)) -> selectedGenes
-            simData <- mixedSpeciesdata[selectedGenes,]
-            selectedGenes <- rownames(simData)
+            # reduce gene dimension to 100 mouse and 100 human genes with the highest gene expression
+            human.simData <- mixedSpeciesdata[grep("HUMAN",rownames(mixedSpeciesdata)),]
+            mouse.simData <- mixedSpeciesdata[grep("MOUSE",rownames(mixedSpeciesdata)),]
+            
+            local.means.human <- data.frame(rowMeans(human.simData))
+            names(local.means.human) <- c("rowMeans")
+            rownames(local.means.human)[order(local.means.human$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.human
+            local.means.mouse <- data.frame(rowMeans(mouse.simData))
+            names(local.means.mouse) <- c("rowMeans")
+            rownames(local.means.mouse)[order(local.means.mouse$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.mouse
+            
+            simData.human <- mixedSpeciesdata[selectedGenes.human,]
+            simData.mouse <- mixedSpeciesdata[selectedGenes.mouse,]
+            
+            simData <- rbind(simData.human,simData.mouse)
+
             # simulation for lasso
-            td <- mapply(lasso.mixed.data, colnames(simData)[1:3],
+            td <- mapply(lasso.mixed.data, colnames(simData),
                          MoreArgs = list(simData))
             theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
             attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "lasso"
