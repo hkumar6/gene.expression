@@ -19,8 +19,13 @@ kknnImpute <- function(id, simData.learn, simData.test, kmaxParam=40) {
   mse <- sum((simData.test[,id]-r$fitted.values)^2)/(dim(simData.test[id])[1])
   x <- simData.test[id]
   x$predicted = r$fitted.values
-  c <- rcorr(as.matrix(x), type = "spearman")
-  outputList <- data.frame(mse = mse, Spear_corr = c$r[1,2],
+  if (dim(x)[1]>4) {
+    c <- rcorr(as.matrix(x), type = "spearman")
+    sc <- c$r[1,2]
+  } else {
+    sc <- NA
+  }
+  outputList <- data.frame(mse = mse, Spear_corr = sc,
                      optimalK = trainingInfo$best.parameters$k,
                      optimalKernel = trainingInfo$best.parameter$kernel)
   return(outputList)

@@ -56,7 +56,11 @@ setMethod(f = "mixedSpeciesGene",
             attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "lasso"
             
             # simulation for kknn
-            #TODO
+            rownames(simData) <- gsub("[_:-]", "", rownames(simData), perl = TRUE)
+            td <- mapply(kknn.mixed.data, rownames(simData),
+                         MoreArgs = list(t(as.data.frame(simData))))
+            theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
+            attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "kknn"
             
             return(theObject)
           })
