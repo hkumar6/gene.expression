@@ -4,6 +4,8 @@
 *.RData
 *.rdata
 *.Ruserdata
+.Rbuildignore
 reports/*.pdf
 .DS_Store
 .Rproj.user
+*.jpeg
