@@ -98,7 +98,10 @@ setMethod(f = "mixedSpeciesCells",
             attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "lasso"
             
             # simulation for kknn
-            # TODO
+            td <- mapply(kknn.mixed.data, colnames(simData),
+                         MoreArgs = list(as.data.frame(simData)))
+            theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
+            attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "kknn"
             
             return(theObject)
           })
