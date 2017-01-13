@@ -139,9 +139,9 @@ setMethod(f = "simulateDropoutCells",
             return(theObject)
           })
 
-#' Analysis of simulation results
+#' Analysis of simulation results for cells
 #' 
-#' This function plots graphs to help analyse between lasso and knn approaches.
+#' This function plots graphs to help analyse between lasso and knn approaches for cell-based imputation.
 #' 
 #' @param theObject an object of the DropoutSimulation class containing simulation results
 #' @param type the type of graph to plot, "compare" will plot difference of mse(also the default value)
@@ -151,18 +151,20 @@ setMethod(f = "simulateDropoutCells",
 #' @docType methods
 #' @importFrom ggplot2 ggplot aes labs geom_density
 #' @exportMethod plot
-setGeneric(name = "plot",
+setGeneric(name = "plot.cells",
            def = function(theObject, type = "compare", p = 0) {
-             standardGeneric("plot")
+             standardGeneric("plot.cells")
            })
 
 #' @rdname DropoutSimulation
 #' @docType methods
 #' @export
-setMethod(f = "plot",
+setMethod(f = "plot.cells",
           signature = "DropoutSimulation",
           definition = function(theObject, type = "compare", p = 0){
-            
+            if(0 == length(theObject@simulation.result.cells)) {
+              stop("The object does not have the data for cell-based imputation.")
+            }
             # plot type 1
             # comparison over all dropout percentages
             if(type == "compare"){
@@ -185,5 +187,56 @@ setMethod(f = "plot",
               return(plotObject)
             } else {
                 stop("Invalid parameters specified")
+            }
+          })
+
+#' Analysis of simulation results for genes
+#' 
+#' This function plots graphs to help analyse between lasso and knn approaches for gene-based imputation.
+#' 
+#' @param theObject an object of the DropoutSimulation class containing simulation results
+#' @param type the type of graph to plot, "compare" will plot difference of mse(also the default value)
+#' @param p the dropout percentage to plot, default: 0 will consider the whole range
+#' 
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @importFrom ggplot2 ggplot aes labs geom_density
+#' @exportMethod plot
+setGeneric(name = "plot.genes",
+           def = function(theObject, type = "compare", p = 0) {
+             standardGeneric("plot.genes")
+           })
+
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @export
+setMethod(f = "plot.genes",
+          signature = "DropoutSimulation",
+          definition = function(theObject, type = "compare", p = 0){
+            if(0 == length(theObject@simulation.result.genes)) {
+              stop("The object does not have the data for gene-based imputation.")
+            }
+            # plot type 1
+            # comparison over all dropout percentages
+            if(type == "compare"){
+              plotData <- vector()
+              for(i in seq(1, length(theObject@simulation.result.genes)-1, by=2)) {
+                if(attr(theObject@simulation.result.genes[[i]], "drop-percentage") == p || 0 == p) {
+                  plotData <- c(plotData,
+                                mapply('-',
+                                       theObject@simulation.result.genes[[i]]["mse",],
+                                       theObject@simulation.result.genes[[i+1]]["mse",]))
+                }
+              }
+              pd <- as.data.frame(plotData)
+              plotObject <- ggplot(pd, aes(plotData)) + geom_density()
+              if(0 == p){
+                plotObject <- plotObject + labs(title = "MSE differences (lasso-knn) over all simulations", x = "mse(lasso)-mse(knn)")
+              } else {
+                plotObject <- plotObject + labs(title = paste("MSE differences (lasso-knn) over", p, "dropout"), x = "mse(lasso)-mse(knn)")
+              }
+              return(plotObject)
+            } else {
+              stop("Invalid parameters specified")
             }
           })
