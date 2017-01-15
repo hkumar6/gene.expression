@@ -1,0 +1,9 @@
+*.Rproj.user
+*.Rproj
+*.Rhistory
+*.RData
+*.rdata
+*.Ruserdata
+reports/*.pdf
+.DS_Store
+.Rproj.user
