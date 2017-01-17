@@ -242,7 +242,10 @@ setMethod(f = "plot.genes",
               }
               x <- sample(Filter(function(x) {return((attr(x, "method") == methodAttr) && (p==0 || attr(x, "drop-percentage") == p))}, theObject@simulation.result.genes), 1)
               geneMse <- unlist(x[[1]]["mse",])
-              geneVars <- apply(X =  cov(t(originalData[colnames(x[[1]]),])), MARGIN = 2, FUN = mean)
+              geneCor <- cor(t(originalData[colnames(x[[1]]),]))
+              # remove variances from the correlation matrix
+              diag(geneCor) <- rep(0, length(diag(geneCor)))
+              geneVars <- apply(X =  geneCor, MARGIN = 2, FUN = mean)
               plotData <- data.frame(geneMse, geneVars)
               plotObject <- ggplot(plotData, aes(x=geneVars, y=geneMse, color=geneMse)) + geom_point()
               plotObject <- plotObject + labs(title = paste("Method:", attr(x[[1]], "method"), ", Dropout:", attr(x[[1]], "drop-percentage")))
