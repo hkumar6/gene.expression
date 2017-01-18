@@ -7,22 +7,22 @@
 #' @param simData.test testing data, for predictions, as data.frame
 #' 
 #' @return data.frame containing results of the simulation
-#'      mean squared error, Spearman correlation, optimal parameters for kknn
+#'      mean squared error, Spearman correlation
 #'
 #' @importFrom stats as.formula
 #' @importFrom kknn train.kknn kknn
 #' @importFrom Hmisc rcorr
 #' @export
-randomForestImpute <- function(id, simData.learn, simData.test, kmaxParam=40) {
-  trainingInfo <- train.kknn(as.formula(paste(id, ".", sep = "~")), simData.learn, kmaxParam, kernel = c("triangular", "rectangular", "epanechnikov", "optimal"), distance = 2)
-  r <- kknn(as.formula(paste(id, ".", sep = "~")), simData.learn, simData.test, distance = 2, kernel = trainingInfo$best.parameters$kernel, k = trainingInfo$best.parameters$k)
-  mse <- sum((simData.test[,id]-r$fitted.values)^2)/(dim(simData.test[id])[1])
-  x <- simData.test[id]
-  x$predicted = r$fitted.values
+randomForestImpute <- function(id, simData.learn, simData.test) {
+  takeout<-which(colnames(simData.learn)==id)
+  # r <- randomForest(as.formula(paste(id, ".", sep = "~")), simData.learn[,-takeout],simData.learn[,id])
+  r <- randomForest(simData.learn[,-takeout],simData.learn[,id])
+  genePredict=predict(r,simData.test[,-takeout])
+  mse <- mean((simData.test[,id]-genePredict)^2)
+  x <- data.frame(simData.test[,id])
+  x$predicted = genePredict
   c <- rcorr(as.matrix(x), type = "spearman")
-  outputList <- data.frame(mse = mse, Spear_corr = c$r[1,2],
-                           optimalK = trainingInfo$best.parameters$k,
-                           optimalKernel = trainingInfo$best.parameter$kernel)
+  outputList <- data.frame(mse = mse, Spear_corr = c$r[1,2])
   return(outputList)
 }
 #' Random Forest imputation - multiple columns
@@ -41,7 +41,7 @@ randomForestImpute <- function(id, simData.learn, simData.test, kmaxParam=40) {
 #' @importFrom Hmisc rcorr
 #' @export
 randomForestImputeAll <- function(selectedList, simData.learn, simData.test) {
-  simulationResult <- mapply(lassoImpute, selectedList,
+  simulationResult <- mapply(randomForestImpute, selectedList,
                              MoreArgs = list(
                                simData.learn,
                                simData.test
