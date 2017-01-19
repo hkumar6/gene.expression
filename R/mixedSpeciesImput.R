@@ -1,7 +1,7 @@
 #' The mixedSpeciesImput class
 #' 
 #' This class has slots to store results of different simulations
-#' using Lasso and kknn methods.
+#' using Lasso, Random Forest and kknn methods.
 #' 
 #' @slot simulation.result.genes a list storing results of all simulations
 #'  where genes are imputed as function of cells
@@ -48,6 +48,13 @@ setMethod(f = "mixedSpeciesGene",
             simData.mouse <- mixedSpeciesdata[selectedGenes.mouse,]
             
             simData <- rbind(simData.human,simData.mouse)
+            
+            # simulation for random forest
+            rownames(simData) <- gsub("[_:-]", "", rownames(simData), perl = TRUE)
+            td <- mapply(randomForest.mixed.data, rownames(simData),
+                         MoreArgs = list(t(as.data.frame(simData))))
+            theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
+            attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "randomForest"
 
             # simulation for lasso
             td <- mapply(lasso.mixed.data, rownames(simData),
@@ -90,7 +97,14 @@ setMethod(f = "mixedSpeciesCells",
             simData.mouse <- mixedSpeciesdata[selectedGenes.mouse,]
             
             simData <- rbind(simData.human,simData.mouse)
-
+            
+            # simulation for random forest
+            td <- mapply(randomForest.mixed.data, colnames(simData),
+                         MoreArgs = list(simData))
+            theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
+            attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "randomForest"
+            
+            
             # simulation for lasso
             td <- mapply(lasso.mixed.data, colnames(simData),
                          MoreArgs = list(simData))
