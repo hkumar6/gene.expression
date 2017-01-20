@@ -28,16 +28,16 @@ lasso.negbin.mixed.data <- function(ID,simData){
       coef.perc <- length(H.coef)/coef
       M.test <- grep("MOUSE",rownames(simData_test))
       prediction.new <- prediction[M.test]
-      counts <- sum(prediction.new = 0)
-      mse.bin <- mean(prediction.new^2)
+      counts <- sum(prediction.new == 0)
+      mse.bin <- mean(prediction.new)
     }else{
       test <- colnames(simData)[which(coef(fit.expr.bin, which = 30)!=0)]
       H.coef <- grep("HUMAN",test)
       coef.perc <- length(H.coef)/coef
       H.test <- grep("HUMAN",rownames(simData_test))
       prediction.new <- prediction[H.test,drop=FALSE]
-      counts <- sum(prediction.new = 0)
-      mse.bin <- mean(prediction.new^2)
+      counts <- sum(prediction.new == 0)
+      mse.bin <- mean(prediction.new)
     }
     
   }else{
