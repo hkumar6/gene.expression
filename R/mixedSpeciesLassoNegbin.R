@@ -46,6 +46,7 @@ lasso.negbin.mixed.data <- function(ID,simData){
     coef.perc = NaN
     counts = NaN
   }
+  result <- data.frame(mse = mse.bin, number.coef = coef, nonzero = n, perc.human= coef.perc,
                        zero.predicted = counts)
   return(result)
 }
