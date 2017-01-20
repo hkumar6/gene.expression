@@ -49,14 +49,14 @@ setMethod(f = "mixedSpeciesGene",
             
             simData <- rbind(simData.human,simData.mouse)
             
-            human.cell <- colnames(simData)[which(colSums(simData.human) > colSuma(simData.mouse))]
-            human.cell.simData <- simData[,which(colSums(simData.human) > colSuma(simData.mouse))]
+            human.cell <- colnames(simData)[which(colSums(simData.human) > colSums(simData.mouse))]
+            human.cell.simData <- simData[,which(colSums(simData.human) > colSums(simData.mouse))]
             human.cell <- unlist(lapply(human.cell, function(x){ toString(c("HUMAN",x))}))
             colnames(human.cell.simData) <- human.cell
             
-            mouse.cell <- colnames(simData)[which(colSums(simData.human) < colSuma(simData.mouse))]
-            mouse.cell.simData <- simData[,which(colSums(simData.human) < colSuma(simData.mouse))]
-            mouse.cell <- unlist(lapply(human.cell, function(x){ toString(c("MOUSE",x))}))
+            mouse.cell <- colnames(simData)[which(colSums(simData.human) < colSums(simData.mouse))]
+            mouse.cell.simData <- simData[,which(colSums(simData.human) < colSums(simData.mouse))]
+            mouse.cell <- unlist(lapply(mouse.cell, function(x){ toString(c("MOUSE",x))}))
             colnames(mouse.cell.simData) <- mouse.cell
             
             simData <- cbind(human.cell.simData, mouse.cell.simData)
@@ -109,14 +109,14 @@ setMethod(f = "mixedSpeciesCells",
             
             simData <- rbind(simData.human,simData.mouse)
             
-            human.cell <- colnames(simData)[which(colSums(simData.human) > colSuma(simData.mouse))]
-            human.cell.simData <- simData[,which(colSums(simData.human) > colSuma(simData.mouse))]
+            human.cell <- colnames(simData)[which(colSums(simData.human) > colSums(simData.mouse))]
+            human.cell.simData <- simData[,which(colSums(simData.human) > colSums(simData.mouse))]
             human.cell <- unlist(lapply(human.cell, function(x){ toString(c("HUMAN",x))}))
             colnames(human.cell.simData) <- human.cell
             
-            mouse.cell <- colnames(simData)[which(colSums(simData.human) < colSuma(simData.mouse))]
-            mouse.cell.simData <- simData[,which(colSums(simData.human) < colSuma(simData.mouse))]
-            mouse.cell <- unlist(lapply(human.cell, function(x){ toString(c("MOUSE",x))}))
+            mouse.cell <- colnames(simData)[which(colSums(simData.human) < colSums(simData.mouse))]
+            mouse.cell.simData <- simData[,which(colSums(simData.human) < colSums(simData.mouse))]
+            mouse.cell <- unlist(lapply(mouse.cell, function(x){ toString(c("MOUSE",x))}))
             colnames(mouse.cell.simData) <- mouse.cell
             
             simData <- cbind(human.cell.simData, mouse.cell.simData)

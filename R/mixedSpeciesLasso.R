@@ -1,30 +1,30 @@
 #library(glmnet)
 #library(Hmisc)
-#mixedSpeciesdata <- mixedSpecies100
+mixedSpeciesdata <- mixedSpecies100
 
-#human.simData <- mixedSpeciesdata[grep("HUMAN",rownames(mixedSpeciesdata)),]
-#mouse.simData <- mixedSpeciesdata[grep("MOUSE",rownames(mixedSpeciesdata)),]
+human.simData <- mixedSpeciesdata[grep("HUMAN",rownames(mixedSpeciesdata)),]
+mouse.simData <- mixedSpeciesdata[grep("MOUSE",rownames(mixedSpeciesdata)),]
 
-#local.means.human <- data.frame(rowMeans(human.simData))
-#names(local.means.human) <- c("rowMeans")
-#rownames(local.means.human)[order(local.means.human$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.human
-#local.means.mouse <- data.frame(rowMeans(mouse.simData))
-#names(local.means.mouse) <- c("rowMeans")
-#rownames(local.means.mouse)[order(local.means.mouse$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.mouse
+local.means.human <- data.frame(rowMeans(human.simData))
+names(local.means.human) <- c("rowMeans")
+rownames(local.means.human)[order(local.means.human$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.human
+local.means.mouse <- data.frame(rowMeans(mouse.simData))
+names(local.means.mouse) <- c("rowMeans")
+rownames(local.means.mouse)[order(local.means.mouse$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.mouse
 
-#simData.human <- mixedSpeciesdata[selectedGenes.human,]
-#simData.mouse <- mixedSpeciesdata[selectedGenes.mouse,]
+simData.human <- mixedSpeciesdata[selectedGenes.human,]
+simData.mouse <- mixedSpeciesdata[selectedGenes.mouse,]
 
-#simData <- rbind(simData.human,simData.mouse)
+simData <- rbind(simData.human,simData.mouse)
 
-human.cell <- colnames(simData)[which(colSums(simData.human) > colSuma(simData.mouse))]
-human.cell.simData <- simData[,which(colSums(simData.human) > colSuma(simData.mouse))]
+human.cell <- colnames(simData)[which(colSums(simData.human) > colSums(simData.mouse))]
+human.cell.simData <- simData[,which(colSums(simData.human) > colSums(simData.mouse))]
 human.cell <- unlist(lapply(human.cell, function(x){ toString(c("HUMAN",x))}))
 colnames(human.cell.simData) <- human.cell
 
-mouse.cell <- colnames(simData)[which(colSums(simData.human) < colSuma(simData.mouse))]
-mouse.cell.simData <- simData[,which(colSums(simData.human) < colSuma(simData.mouse))]
-mouse.cell <- unlist(lapply(human.cell, function(x){ toString(c("MOUSE",x))}))
+mouse.cell <- colnames(simData)[which(colSums(simData.human) < colSums(simData.mouse))]
+mouse.cell.simData <- simData[,which(colSums(simData.human) < colSums(simData.mouse))]
+mouse.cell <- unlist(lapply(mouse.cell, function(x){ toString(c("MOUSE",x))}))
 colnames(mouse.cell.simData) <- mouse.cell
 
 simData <- cbind(human.cell.simData, mouse.cell.simData)
@@ -67,7 +67,7 @@ lasso.mixed.data <- function(ID,simData){
       M.test <- grep("MOUSE",rownames(simData_test))
       prediction.new <- prediction[M.test]
       counts <- sum(prediction.new = 0)
-      mse.bin <- mean(prediction.new^2)
+      mse.lin <- mean(prediction.new^2)
     }else{
       test <- colnames(simData)[which(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)]
       H.coef <- grep("HUMAN",test)
@@ -75,7 +75,7 @@ lasso.mixed.data <- function(ID,simData){
       H.test <- grep("HUMAN",rownames(simData_test))
       prediction.new <- prediction[H.test,drop=FALSE]
       counts <- sum(prediction.new = 0)
-      mse.bin <- mean(prediction.new^2)
+      mse.lin <- mean(prediction.new^2)
     }
     
   } else { # if there are less than 9 non zero entries compare results with mse
@@ -86,7 +86,7 @@ lasso.mixed.data <- function(ID,simData){
       coef= NaN
     } else {
       j  <- which(test == min(test))[1]
-    coef <- sum(coef(fit.expr.lin, s = fit.expr.lin$lambda[j])!=0) }}
+    coef <- sum(coef(fit.expr.lin, s = fit.expr.lin$lambda[j])!=0) 
     
     if (length(grep("HUMAN",colnames(simData)[i]))>0){
       test <- colnames(simData)[which(coef(fit.expr.lin, s = fit.expr.lin$lambda[j])!=0)]
@@ -95,7 +95,7 @@ lasso.mixed.data <- function(ID,simData){
       M.test <- grep("MOUSE",rownames(simData_test))
       prediction.new <- prediction[M.test]
       counts <- sum(prediction.new = 0)
-      mse.bin <- mean(prediction.new)
+      mse.lin <- mean(prediction.new^2)
     }else{
       test <- colnames(simData)[which(coef(fit.expr.lin, s = fit.expr.lin$lambda[j])!=0)]
       H.coef <- grep("HUMAN",test)
@@ -103,10 +103,9 @@ lasso.mixed.data <- function(ID,simData){
       H.test <- grep("HUMAN",rownames(simData_test))
       prediction.new <- prediction[H.test,drop=FALSE]
       counts <- sum(prediction.new = 0)
-      mse.bin <- mean(prediction.new)
-    }
+      mse.lin <- mean(prediction.new^2)
+    }}}
   
-  mse.lin <- mean(((exp(prediction)-1))^2)
   }else{
     mse.lin = NaN
     coef = NaN
@@ -119,4 +118,4 @@ lasso.mixed.data <- function(ID,simData){
   return(result)
 }
 
-#resultgenes <- mapply(lasso.mixed.data, rownames(simData), MoreArgs = list(t(simData)))
+resultgenes <- mapply(lasso.mixed.data, rownames(simData)[1:15], MoreArgs = list(t(simData)))
