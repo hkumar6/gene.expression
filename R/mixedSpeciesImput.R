@@ -48,12 +48,30 @@ setMethod(f = "mixedSpeciesGene",
             simData.mouse <- mixedSpeciesdata[selectedGenes.mouse,]
             
             simData <- rbind(simData.human,simData.mouse)
+            
+            human.cell <- colnames(simData)[which(colSums(simData.human) > colSums(simData.mouse))]
+            human.cell.simData <- simData[,which(colSums(simData.human) > colSums(simData.mouse))]
+            human.cell <- unlist(lapply(human.cell, function(x){ toString(c("HUMAN",x))}))
+            colnames(human.cell.simData) <- human.cell
+            
+            mouse.cell <- colnames(simData)[which(colSums(simData.human) < colSums(simData.mouse))]
+            mouse.cell.simData <- simData[,which(colSums(simData.human) < colSums(simData.mouse))]
+            mouse.cell <- unlist(lapply(mouse.cell, function(x){ toString(c("MOUSE",x))}))
+            colnames(mouse.cell.simData) <- mouse.cell
+            
+            simData <- cbind(human.cell.simData, mouse.cell.simData)
 
             # simulation for lasso
             td <- mapply(lasso.mixed.data, rownames(simData),
                          MoreArgs = list(t(simData)))
             theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
             attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "lasso"
+            
+            # simulation for lasso Negative Binomial
+            td <- mapply(lasso.negbin.mixed.data, rownames(simData),
+                         MoreArgs = list(t(simData)))
+            theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
+            attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "lassoNegBin"
             
             # simulation for kknn
             rownames(simData) <- gsub("[_:-]", "", rownames(simData), perl = TRUE)
@@ -90,6 +108,18 @@ setMethod(f = "mixedSpeciesCells",
             simData.mouse <- mixedSpeciesdata[selectedGenes.mouse,]
             
             simData <- rbind(simData.human,simData.mouse)
+            
+            human.cell <- colnames(simData)[which(colSums(simData.human) > colSums(simData.mouse))]
+            human.cell.simData <- simData[,which(colSums(simData.human) > colSums(simData.mouse))]
+            human.cell <- unlist(lapply(human.cell, function(x){ toString(c("HUMAN",x))}))
+            colnames(human.cell.simData) <- human.cell
+            
+            mouse.cell <- colnames(simData)[which(colSums(simData.human) < colSums(simData.mouse))]
+            mouse.cell.simData <- simData[,which(colSums(simData.human) < colSums(simData.mouse))]
+            mouse.cell <- unlist(lapply(mouse.cell, function(x){ toString(c("MOUSE",x))}))
+            colnames(mouse.cell.simData) <- mouse.cell
+            
+            simData <- cbind(human.cell.simData, mouse.cell.simData)
 
             # simulation for lasso
             td <- mapply(lasso.mixed.data, colnames(simData),
@@ -97,11 +127,18 @@ setMethod(f = "mixedSpeciesCells",
             theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
             attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "lasso"
             
-            # simulation for kknn
-            td <- mapply(kknn.mixed.data, colnames(simData),
-                         MoreArgs = list(as.data.frame(simData)))
+            # simulation for lasso Negative Binomial
+            td <- mapply(lasso.negbin.mixed.data, colnames(simData),
+                         MoreArgs = list(simData))
             theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
-            attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "kknn"
+            attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "lassoNegBin"
+            
+            
+            # simulation for kknn
+            #td <- mapply(kknn.mixed.data, colnames(simData),
+             #            MoreArgs = list(as.data.frame(simData)))
+            #theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
+            #attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "kknn"
             
             return(theObject)
           })
