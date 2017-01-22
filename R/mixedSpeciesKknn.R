@@ -8,13 +8,16 @@ kknn.mixed.data <- function(id,simData){
   if(nrow(simData.learn) > 3) {
     kmax <- sum(apply(simData.learn, 2, sum) != 0)
     kmax <- if(kmax > 20) 20 else kmax
-    output <- kknnImpute(id, simData.learn = as.data.frame(simData.learn), simData.test = as.data.frame(simData.test), kmax)
+    output <- kknnImpute(id, simData.learn = as.data.frame(simData.learn), simData.test = as.data.frame(simData.test), kmax, mixedSpeciesData = TRUE)
     # output <- estimateKmax(id, simData.learn = simData_learn, simData.test = simData_test, kmax)
+    output$nonzero = nrow(simData.learn)
     return(output)
   } else {
     noImputationOutput <- data.frame(mse = NA, Spear_corr = NA,
                              optimalK = NA,
-                             optimalKernel = NA)
+                             optimalKernel = NA,
+                             zero.predicted = NA,
+                             nonzero = nrow(simData.learn))
     return(noImputationOutput)
   }
 }

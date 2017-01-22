@@ -18,4 +18,7 @@ where genes are imputed as function of cells}
 \item{\code{simulation.result.cells}}{a list storing results of all simulations
 where cells are imputed as functions of genes}
 }}
+\examples{
+t <- mixedSpeciesImput()
+}
 

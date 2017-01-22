@@ -4,3 +4,5 @@ Two approaches are currently considered
 -> k-nearest neighbour method
 
 WIP: random forests
+
+[![Travis-CI Build Status](https://travis-ci.org/hkumar6/gene.expression.svg?branch=master)](https://travis-ci.org/hkumar6/gene.expression)

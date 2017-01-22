@@ -4,7 +4,8 @@
 \alias{kknnImpute}
 \title{kknn imputation - single column}
 \usage{
-kknnImpute(id, simData.learn, simData.test)
+kknnImpute(id, simData.learn, simData.test, kmaxParam = 40,
+  mixedSpeciesData = FALSE)
 }
 \arguments{
 \item{id}{string for the cell or gene to impute, must be a column name in the data}
@@ -12,6 +13,12 @@ kknnImpute(id, simData.learn, simData.test)
 \item{simData.learn}{training data as data.frame}
 
 \item{simData.test}{testing data, for predictions, as data.frame}
+
+\item{kmaxParam}{integer specifying the maximum number of neighbors to consider for
+training data}
+
+\item{mixedSpeciesData}{TRUE/FALSE depending on whether the data belongs to the
+mixed species experiment. If TRUE, additional measures are included for analysis}
 }
 \value{
 data.frame containing results of the simulation

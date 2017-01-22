@@ -10,6 +10,9 @@
 #'  
 #' @importFrom methods new
 #' @exportClass mixedSpeciesImput
+#' 
+#' @examples
+#' t <- mixedSpeciesImput()
 
 mixedSpeciesImput <- setClass("mixedSpeciesImput",
                            slots = 
