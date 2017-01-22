@@ -10,7 +10,7 @@
 #'      mean squared error, Spearman correlation
 #'
 #' @importFrom stats as.formula
-#' @importFrom kknn train.kknn kknn
+#' @importFrom randomForest train.randomForest
 #' @importFrom Hmisc rcorr
 #' @export
 randomForestImpute <- function(id, simData.learn, simData.test) {
@@ -21,8 +21,14 @@ randomForestImpute <- function(id, simData.learn, simData.test) {
   mse <- mean((simData.test[,id]-genePredict)^2)
   x <- data.frame(simData.test[,id])
   x$predicted = genePredict
-  c <- rcorr(as.matrix(x), type = "spearman")
-  outputList <- data.frame(mse = mse, Spear_corr = c$r[1,2])
+  
+  if (dim(as.matrix(x))>4){
+    c <- rcorr(as.matrix(x), type = "spearman")
+    outputList <- data.frame(mse = mse, Spear_corr = c$r[1,2])}
+  else{
+    outputList <- data.frame(mse = mse)
+    }
+
   return(outputList)
 }
 #' Random Forest imputation - multiple columns
