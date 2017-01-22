@@ -26,7 +26,7 @@ randomForestImpute <- function(id, simData.learn, simData.test) {
     c <- rcorr(as.matrix(x), type = "spearman")
     outputList <- data.frame(mse = mse, Spear_corr = c$r[1,2])}
   else{
-    outputList <- data.frame(mse = mse)
+    outputList <- data.frame(mse = mse, Spear_corr <- NA)
     }
 
   return(outputList)
