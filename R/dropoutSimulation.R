@@ -60,9 +60,7 @@ setMethod(f = "simulateDropoutGene",
             theObject@n <- n
             
             # select 500 most abundantly expressed genes
-            local.means <- data.frame(rowMeans(expressionData))
-            names(local.means) <- c("rowMeans")
-            rownames(local.means)[order(local.means$rowMeans, decreasing = TRUE)[1:500]] -> local.selectedGenes
+            Filter(function(x){ return(sum(expr[x,] == 0) == 0)}, rownames(expr)) -> local.selectedGenes
             expressionData[local.selectedGenes, ] -> local.simData
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {

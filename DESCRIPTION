@@ -1,7 +1,7 @@
 Package: gene.expression
 Title: Imputing dropouts in gene expression
 Version: 1.0
-Author: Kumar Harsha, Maria Mircea
+Author: Kumar Harsha, Maria Mircea, Simone Furcas
 Maintainer: Kumar Harsha <kumar.harsha@tum.de>
 Description: This package contains utilities to study dropouts in gene
     expression in single cells using the LASSO and k-nearest neighbour approach.
