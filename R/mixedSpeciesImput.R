@@ -76,12 +76,12 @@ setMethod(f = "mixedSpeciesGene",
             theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
             attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "lassoNegBin"
             
-            # simulation for kknn
-            #rownames(simData) <- gsub("[_:-]", "", rownames(simData), perl = TRUE)
-            #td <- mapply(kknn.mixed.data, rownames(simData),
-             #            MoreArgs = list(t(as.data.frame(simData))))
-            #theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
-            #attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "kknn"
+            #simulation for kknn
+            rownames(simData) <- gsub("[_:-]", "", rownames(simData), perl = TRUE)
+            td <- mapply(kknn.mixed.data, rownames(simData),
+                        MoreArgs = list(t(as.data.frame(simData))))
+            theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
+            attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "kknn"
             
             return(theObject)
           })
@@ -138,10 +138,10 @@ setMethod(f = "mixedSpeciesCells",
             
             
             # simulation for kknn
-            #td <- mapply(kknn.mixed.data, colnames(simData),
-             #            MoreArgs = list(as.data.frame(simData)))
-            #theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
-            #attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "kknn"
+            td <- mapply(kknn.mixed.data, colnames(simData),
+                        MoreArgs = list(as.data.frame(simData)))
+            theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
+            attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "kknn"
             
             return(theObject)
           })
