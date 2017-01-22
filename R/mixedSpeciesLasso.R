@@ -3,6 +3,7 @@
 #mixedSpeciesdata <- mixedSpecies100
 
 #human.simData <- mixedSpeciesdata[grep("HUMAN",rownames(mixedSpeciesdata)),]
+
 #mouse.simData <- mixedSpeciesdata[grep("MOUSE",rownames(mixedSpeciesdata)),]
 
 #local.means.human <- data.frame(rowMeans(human.simData))
@@ -64,7 +65,7 @@ lasso.mixed.data <- function(ID,simData){
       test <- colnames(simData)[which(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)]
       H.coef <- grep("HUMAN",test)
       coef.perc <- length(H.coef)/coef
-      M.test <- grep("MOUSE",rownames(simData_test))
+      M.test <- grep("MOUSE",rownames(prediction))
       prediction.new <- prediction[M.test]
       counts <- sum(prediction.new == 0)
       mse.lin <- mean(prediction.new)
@@ -72,7 +73,7 @@ lasso.mixed.data <- function(ID,simData){
       test <- colnames(simData)[which(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)]
       H.coef <- grep("HUMAN",test)
       coef.perc <- length(H.coef)/coef
-      H.test <- grep("HUMAN",rownames(simData_test))
+      H.test <- grep("HUMAN",rownames(prediction))
       prediction.new <- prediction[H.test,drop=FALSE]
       counts <- sum(prediction.new == 0)
       mse.lin <- mean(prediction.new)
