@@ -17,6 +17,7 @@
 #' @importFrom kknn train.kknn kknn
 #' @importFrom Hmisc rcorr
 #' @export
+
 kknnImpute <- function(id, simData.learn, simData.test, kmaxParam=40, mixedSpeciesData = FALSE) {
   trainingInfo <- train.kknn(as.formula(paste(id, ".", sep = "~")), simData.learn, kmaxParam, kernel = c("triangular", "rectangular", "epanechnikov", "optimal"), distance = 2)
   r <- kknn(as.formula(paste(id, ".", sep = "~")), simData.learn, simData.test, distance = 2, kernel = trainingInfo$best.parameters$kernel, k = trainingInfo$best.parameters$k)

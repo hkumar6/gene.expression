@@ -19,9 +19,11 @@ Imports:
 Collate:
     'kknn-functions.R'
     'lasso-functions.R'
+    'randomForest_function.R'
     'mixedSpeciesLasso.R'
     'mixedSpeciesLassoNegbin.R'
     'mixedSpeciesKknn.R'
+    'mixedSpeciesRandomForest.R'
     'dropoutSimulation.R'
     'mixedSpeciesImput.R'
 RoxygenNote: 5.0.1

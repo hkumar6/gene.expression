@@ -65,15 +65,26 @@ setMethod(f = "simulateDropoutGene",
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
                 sample(colnames(expressionData), p*ncol(expressionData)) -> local.selectedCells
+              
+                # simulation for random forest
+                td <- mapply(randomForestImpute, local.selectedGenes,
+                             MoreArgs = list(as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
+                                             as.matrix(t(local.simData[, local.selectedCells]))))
+                theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
+                attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "drop-percentage") <- p
+                attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "randomForest"
+                
                 
                 # simulation for lasso
                 td <- mapply(lassoImpute, local.selectedGenes,
-                             MoreArgs = list(as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])), 
+                             MoreArgs = list(as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
                                              as.matrix(t(local.simData[, local.selectedCells]))))
                 theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
                 attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "drop-percentage") <- p
                 attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "lasso"
-                
+
+
+
                 # simulation for kknn
                 td <- mapply(kknnImpute, local.selectedGenes,
                              MoreArgs = list(as.data.frame(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
@@ -120,6 +131,15 @@ setMethod(f = "simulateDropoutCells",
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
                 sample(rownames(local.simData), p*nrow(local.simData)) -> local.dropoutGenes
+                
+                # simulation for random forest
+                td <- mapply(randomForestImpute, colnames(local.simData),
+                             MoreArgs = list(as.data.frame(local.simData[-which(rownames(local.simData) %in% local.dropoutGenes),]),
+                                             as.data.frame(local.simData[local.dropoutGenes,]) ))
+                theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
+                attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "drop-percentage") <- p
+                attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "randomForest"
+                
                 # simulation for lasso
                 td <- mapply(lassoImpute, colnames(local.simData),
                              MoreArgs = list(as.matrix(local.simData[-which(rownames(local.simData) %in% local.dropoutGenes),]),
@@ -152,6 +172,7 @@ setMethod(f = "simulateDropoutCells",
 #' @docType methods
 #' @importFrom ggplot2 ggplot aes labs geom_density
 #' @exportMethod plot.cells
+
 setGeneric(name = "plot.cells",
            def = function(theObject, type = "compare", p = 0) {
              standardGeneric("plot.cells")
