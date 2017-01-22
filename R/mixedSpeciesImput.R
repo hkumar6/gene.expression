@@ -138,8 +138,14 @@ setMethod(f = "mixedSpeciesCells",
             
             
             # simulation for kknn
+<<<<<<< HEAD
             td <- mapply(kknn.mixed.data, colnames(simData),
                         MoreArgs = list(as.data.frame(simData)))
+=======
+            colnames(simData) <- gsub("[ ,]", "", colnames(simData), perl = TRUE)
+            td <- mapply(kknn.mixed.data, colnames(simData),
+                       MoreArgs = list(as.data.frame(simData)))
+>>>>>>> kh
             theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
             attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "kknn"
             
