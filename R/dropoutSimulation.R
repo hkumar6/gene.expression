@@ -16,6 +16,9 @@
 #' @rdname DropoutSimulation
 #' @importFrom methods new
 #' @exportClass DropoutSimulation
+#' 
+#' @examples
+#' t <- DropoutSimulation()
 
 DropoutSimulation <- setClass("DropoutSimulation",
                               slots = 
@@ -150,7 +153,7 @@ setMethod(f = "simulateDropoutCells",
 #' @rdname DropoutSimulation
 #' @docType methods
 #' @importFrom ggplot2 ggplot aes labs geom_density
-#' @exportMethod plot
+#' @exportMethod plot.cells
 setGeneric(name = "plot.cells",
            def = function(theObject, type = "compare", p = 0) {
              standardGeneric("plot.cells")
@@ -201,7 +204,7 @@ setMethod(f = "plot.cells",
 #' @rdname DropoutSimulation
 #' @docType methods
 #' @importFrom ggplot2 ggplot aes labs geom_density
-#' @exportMethod plot
+#' @exportMethod plot.genes
 setGeneric(name = "plot.genes",
            def = function(theObject, type = "compare", p = 0, ...) {
              standardGeneric("plot.genes")
