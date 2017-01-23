@@ -60,7 +60,7 @@ setMethod(f = "simulateDropoutGene",
             theObject@n <- n
             
             # select 500 most abundantly expressed genes
-            Filter(function(x){ return(sum(expr[x,] == 0) == 0)}, rownames(expr)) -> local.selectedGenes
+            Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
             expressionData[local.selectedGenes, ] -> local.simData
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
@@ -123,9 +123,7 @@ setMethod(f = "simulateDropoutCells",
             theObject@n <- n
             
             # select 500 most abundantly expressed genes
-            local.means <- data.frame(rowMeans(expressionData))
-            names(local.means) <- c("rowMeans")
-            rownames(local.means)[order(local.means$rowMeans, decreasing = TRUE)[1:500]] -> local.selectedGenes
+            Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
             expressionData[local.selectedGenes, ] -> local.simData
             colnames(local.simData) <- gsub("[_?]", "", gsub("^[0-9]", "X", colnames(local.simData), perl = TRUE), perl = TRUE)
             for (p in theObject@dropout.percentage) {
@@ -158,6 +156,43 @@ setMethod(f = "simulateDropoutCells",
               }
             }
             return(theObject)
+          })
+
+#' Plot imputed values for genes
+#' 
+#' This function plots the observed v/s predicted values for gene imputation.
+#' 
+#' @param expressionData the data of gene expression values
+#' @param geneID the geneID to plot
+#' 
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @importFrom ggplot2 ggplot aes labs
+#' @exportMethod plot.predict.gene
+
+setGeneric(name = "plot.predict.gene",
+           def = function(expressionData, drop.percent, geneID) {
+             standardGeneric("plot.predict.gene")
+           })
+
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @export
+setMethod(f = "plot.predict.gene",
+          signature = "ANY",
+          definition = function(expressionData, drop.percent, geneID) {
+            Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
+            expressionData[local.selectedGenes, ] -> local.simData
+            sample(colnames(expressionData), drop.percent*ncol(expressionData)) -> local.selectedCells
+            
+            original.values <- local.simData[geneID, local.selectedCells]
+            predicted.values <- kknnImpute(geneID,
+                                           as.data.frame(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
+                                           as.data.frame(t(local.simData[, local.selectedCells])), predicted = TRUE)
+            plotData <- data.frame(original.values, predicted.values)
+            kknnPlot <- ggplot(plotData, aes(y=predicted.values, x=original.values, color=predicted.values)) + geom_point() + geom_line(aes(y=original.values))
+            kknnPlot <- kknnPlot + labs(title = paste("Predicted values for gene:", geneID, ", Dropout:", drop.percent, ", Method: kknn"))
+            return(kknnPlot)
           })
 
 #' Analysis of simulation results for cells
@@ -267,7 +302,7 @@ setMethod(f = "plot.genes",
               geneCor <- cor(t(originalData[colnames(x[[1]]),]))
               # remove variances from the correlation matrix
               diag(geneCor) <- rep(0, length(diag(geneCor)))
-              geneVars <- apply(X =  geneCor, MARGIN = 2, FUN = mean)
+              geneVars <- apply(X =  abs(geneCor), MARGIN = 2, FUN = mean)
               plotData <- data.frame(geneMse, geneVars)
               plotObject <- ggplot(plotData, aes(x=geneVars, y=geneMse, color=geneMse)) + geom_point()
               plotObject <- plotObject + labs(title = paste("Method:", attr(x[[1]], "method"), ", Dropout:", attr(x[[1]], "drop-percentage")))
