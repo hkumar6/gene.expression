@@ -17,9 +17,15 @@
 #' @importFrom kknn train.kknn kknn
 #' @importFrom Hmisc rcorr
 #' @export
-kknnImpute <- function(id, simData.learn, simData.test, kmaxParam=40, mixedSpeciesData = FALSE) {
+
+kknnImpute <- function(id, simData.learn, simData.test, kmaxParam=40, mixedSpeciesData = FALSE, predicted = FALSE) {
   trainingInfo <- train.kknn(as.formula(paste(id, ".", sep = "~")), simData.learn, kmaxParam, kernel = c("triangular", "rectangular", "epanechnikov", "optimal"), distance = 2)
   r <- kknn(as.formula(paste(id, ".", sep = "~")), simData.learn, simData.test, distance = 2, kernel = trainingInfo$best.parameters$kernel, k = trainingInfo$best.parameters$k)
+  
+  if(predicted) {
+    return(r$fitted.values)
+  }
+  
   mse <- sum((simData.test[,id]-r$fitted.values)^2)/(dim(simData.test[id])[1])
   x <- simData.test[id]
   x$predicted = r$fitted.values

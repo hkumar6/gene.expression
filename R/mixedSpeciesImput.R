@@ -47,7 +47,7 @@ setMethod(f = "mixedSpeciesGene",
             mouse.counts <- colSums(mouse.simData != 0)
             
             #exclude cells that have a very similar count of gene expression in both species
-            mixed.cells <- sort(abs(human.counts - mouse.counts))[1:50]
+            mixed.cells <- sort(abs(human.counts - mouse.counts))[1:20]
             mixed.cells <- names(mixed.cells)
             simData <- simData[,!(names(simData) %in% mixed.cells)]
             human.counts <- human.counts[!(names(human.counts) %in% mixed.cells)]
@@ -66,18 +66,18 @@ setMethod(f = "mixedSpeciesGene",
             colnames(human.cell.simData) <- human.cells
             
             #select 100 most expressed cells from human and 100 from mouse
-            local.means.human <- data.frame(colMeans(human.cell.simData))
-            names(local.means.human) <- c("colMeans")
-            rownames(local.means.human)[order(local.means.human$colMeans, decreasing = TRUE)[1:100]] -> selectedCells.human
-            local.means.mouse <- data.frame(colMeans(mouse.cell.simData))
-            names(local.means.mouse) <- c("colMeans")
-            rownames(local.means.mouse)[order(local.means.mouse$colMeans, decreasing = TRUE)[1:100]] -> selectedCells.mouse
+            #local.means.human <- data.frame(colMeans(human.cell.simData))
+            #names(local.means.human) <- c("colMeans")
+            #rownames(local.means.human)[order(local.means.human$colMeans, decreasing = TRUE)[1:100]] -> selectedCells.human
+            #local.means.mouse <- data.frame(colMeans(mouse.cell.simData))
+            #names(local.means.mouse) <- c("colMeans")
+            #rownames(local.means.mouse)[order(local.means.mouse$colMeans, decreasing = TRUE)[1:100]] -> selectedCells.mouse
             
-            simData.human <- human.cell.simData[,selectedCells.human]
-            simData.mouse <- mouse.cell.simData[,selectedCells.mouse]
+            #simData.human <- human.cell.simData[,selectedCells.human]
+            #simData.mouse <- mouse.cell.simData[,selectedCells.mouse]
             
             #unite both data sets
-            simData <- cbind(simData.human, simData.mouse)
+            simData <- cbind(human.cell.simData, mouse.cell.simData)
             
             #Reduce Number of Genes (100 mouse and 100 human most expressed genes)
             local.means.human <- data.frame(rowMeans(human.simData))
@@ -99,6 +99,17 @@ setMethod(f = "mixedSpeciesGene",
             theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
             attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "randomForest"
             
+
+            simData <- cbind(human.cell.simData, mouse.cell.simData)
+
+            # simulation for random forest
+            rownames(simData) <- gsub("[_:-]", "", rownames(simData), perl = TRUE)
+            td <- mapply(randomForest.mixed.data, rownames(simData),
+                         MoreArgs = list(t(as.data.frame(simData))))
+            theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
+            attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "randomForest"
+
+
             # simulation for lasso
             td <- mapply(lasso.mixed.data, rownames(simData),
                          MoreArgs = list(t(simData)))
@@ -190,6 +201,14 @@ setMethod(f = "mixedSpeciesCells",
              simulation for random forest
             td <- mapply(randomForest.mixed.data, colnames(simData),
                         MoreArgs = list(simData))
+            theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
+            attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "randomForest"
+            
+            simData <- cbind(human.cell.simData, mouse.cell.simData)
+
+            # simulation for random forest
+            td <- mapply(randomForest.mixed.data, colnames(simData),
+                         MoreArgs = list(simData))
             theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
             attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "randomForest"
             

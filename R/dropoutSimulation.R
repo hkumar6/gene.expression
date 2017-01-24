@@ -60,22 +60,31 @@ setMethod(f = "simulateDropoutGene",
             theObject@n <- n
             
             # select 500 most abundantly expressed genes
-            local.means <- data.frame(rowMeans(expressionData))
-            names(local.means) <- c("rowMeans")
-            rownames(local.means)[order(local.means$rowMeans, decreasing = TRUE)[1:500]] -> local.selectedGenes
+            Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
             expressionData[local.selectedGenes, ] -> local.simData
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
                 sample(colnames(expressionData), p*ncol(expressionData)) -> local.selectedCells
+              
+                # simulation for random forest
+                td <- mapply(randomForestImpute, local.selectedGenes,
+                             MoreArgs = list(as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
+                                             as.matrix(t(local.simData[, local.selectedCells]))))
+                theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
+                attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "drop-percentage") <- p
+                attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "randomForest"
+                
                 
                 # simulation for lasso
                 td <- mapply(lassoImpute, local.selectedGenes,
-                             MoreArgs = list(as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])), 
+                             MoreArgs = list(as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
                                              as.matrix(t(local.simData[, local.selectedCells]))))
                 theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
                 attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "drop-percentage") <- p
                 attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "lasso"
-                
+
+
+
                 # simulation for kknn
                 td <- mapply(kknnImpute, local.selectedGenes,
                              MoreArgs = list(as.data.frame(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
@@ -114,14 +123,21 @@ setMethod(f = "simulateDropoutCells",
             theObject@n <- n
             
             # select 500 most abundantly expressed genes
-            local.means <- data.frame(rowMeans(expressionData))
-            names(local.means) <- c("rowMeans")
-            rownames(local.means)[order(local.means$rowMeans, decreasing = TRUE)[1:500]] -> local.selectedGenes
+            Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
             expressionData[local.selectedGenes, ] -> local.simData
             colnames(local.simData) <- gsub("[_?]", "", gsub("^[0-9]", "X", colnames(local.simData), perl = TRUE), perl = TRUE)
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
                 sample(rownames(local.simData), p*nrow(local.simData)) -> local.dropoutGenes
+                
+                # simulation for random forest
+                td <- mapply(randomForestImpute, colnames(local.simData),
+                             MoreArgs = list(as.data.frame(local.simData[-which(rownames(local.simData) %in% local.dropoutGenes),]),
+                                             as.data.frame(local.simData[local.dropoutGenes,]) ))
+                theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
+                attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "drop-percentage") <- p
+                attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "randomForest"
+                
                 # simulation for lasso
                 td <- mapply(lassoImpute, colnames(local.simData),
                              MoreArgs = list(as.matrix(local.simData[-which(rownames(local.simData) %in% local.dropoutGenes),]),
@@ -142,6 +158,43 @@ setMethod(f = "simulateDropoutCells",
             return(theObject)
           })
 
+#' Plot imputed values for genes
+#' 
+#' This function plots the observed v/s predicted values for gene imputation.
+#' 
+#' @param expressionData the data of gene expression values
+#' @param geneID the geneID to plot
+#' 
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @importFrom ggplot2 ggplot aes labs
+#' @exportMethod plot.predict.gene
+
+setGeneric(name = "plot.predict.gene",
+           def = function(expressionData, drop.percent, geneID) {
+             standardGeneric("plot.predict.gene")
+           })
+
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @export
+setMethod(f = "plot.predict.gene",
+          signature = "ANY",
+          definition = function(expressionData, drop.percent, geneID) {
+            Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
+            expressionData[local.selectedGenes, ] -> local.simData
+            sample(colnames(expressionData), drop.percent*ncol(expressionData)) -> local.selectedCells
+            
+            original.values <- local.simData[geneID, local.selectedCells]
+            predicted.values <- kknnImpute(geneID,
+                                           as.data.frame(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
+                                           as.data.frame(t(local.simData[, local.selectedCells])), predicted = TRUE)
+            plotData <- data.frame(original.values, predicted.values)
+            kknnPlot <- ggplot(plotData, aes(y=predicted.values, x=original.values, color=predicted.values)) + geom_point() + geom_line(aes(y=original.values))
+            kknnPlot <- kknnPlot + labs(title = paste("Predicted values for gene:", geneID, ", Dropout:", drop.percent, ", Method: kknn"))
+            return(kknnPlot)
+          })
+
 #' Analysis of simulation results for cells
 #' 
 #' This function plots graphs to help analyse between lasso and knn approaches for cell-based imputation.
@@ -154,6 +207,7 @@ setMethod(f = "simulateDropoutCells",
 #' @docType methods
 #' @importFrom ggplot2 ggplot aes labs geom_density
 #' @exportMethod plot.cells
+
 setGeneric(name = "plot.cells",
            def = function(theObject, type = "compare", p = 0) {
              standardGeneric("plot.cells")
@@ -248,7 +302,7 @@ setMethod(f = "plot.genes",
               geneCor <- cor(t(originalData[colnames(x[[1]]),]))
               # remove variances from the correlation matrix
               diag(geneCor) <- rep(0, length(diag(geneCor)))
-              geneVars <- apply(X =  geneCor, MARGIN = 2, FUN = mean)
+              geneVars <- apply(X =  abs(geneCor), MARGIN = 2, FUN = mean)
               plotData <- data.frame(geneMse, geneVars)
               plotObject <- ggplot(plotData, aes(x=geneVars, y=geneMse, color=geneMse)) + geom_point()
               plotObject <- plotObject + labs(title = paste("Method:", attr(x[[1]], "method"), ", Dropout:", attr(x[[1]], "drop-percentage")))

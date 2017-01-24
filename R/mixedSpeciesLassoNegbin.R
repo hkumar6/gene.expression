@@ -20,7 +20,7 @@ lasso.negbin.mixed.data <- function(ID,simData){
   if (dim(simData_learn)[1]>2 && dim(simData_test)[1]>2){ #if there is more than one entry non zero do regression
     fit.expr.bin <- glmreg(vec.learn ~ ., data = simData_learn, family = "negbin",  theta=1)
     cv.bin <- cv.glmreg(vec.learn ~ ., data = simData_learn, family = "negbin",  theta=1)
-    prediction <- predict(fit.expr.bin, newx = simData_test, which = cv.bin$lambda.which, type = "response")
+    prediction <- predict(fit.expr.bin, newx = simData_test, which =cv.bin$lambda.which, type = "response")
     
     lambda <- cv.bin$lambda.optim
     lambda.w <- cv.bin$lambda.which
@@ -55,6 +55,11 @@ lasso.negbin.mixed.data <- function(ID,simData){
   return(result)
 }
 
-test <- mapply(lasso.negbin.mixed.data, colnames(simData)[c(5,9,13,56,79,104,147,159,193,167)], MoreArgs = list(simData))
+system.time(
 
+#system.time(
+ # test <- mapply(lasso.mixed.data, colnames(simData)[c(9)], MoreArgs = list(simData)))
+
+#system.time(
+ # test <- mapply(randomForest.mixed.data, colnames(simData)[c(9)], MoreArgs = list(simData)))
 
