@@ -19,7 +19,11 @@ lasso.negbin.mixed.data <- function(ID,simData){
   n = dim(simData_learn)[1] # number of non-zero entries
   if (dim(simData_learn)[1]>2 && dim(simData_test)[1]>2){ #if there is more than one entry non zero do regression
     fit.expr.bin <- glmreg(vec.learn ~ ., data = simData_learn, family = "negbin",  theta=1)
-    prediction <- predict(fit.expr.bin, newx = simData_test, which = 30, type = "response")
+    cv.bin <- cv.glmreg(vec.learn ~ ., data = simData_learn, family = "negbin",  theta=1)
+    prediction <- predict(fit.expr.bin, newx = simData_test, which = cv.bin$lambda.which, type = "response")
+    
+    lambda <- cv.bin$lambda.optim
+    lambda.w <- cv.bin$lambda.which
     
     coef = sum(coef(fit.expr.bin, which = 30) !=0)
     if (length(grep("HUMAN",colnames(simData)[i]))>0){
@@ -47,6 +51,10 @@ lasso.negbin.mixed.data <- function(ID,simData){
     counts = NaN
   }
   result <- data.frame(mse = mse.bin, number.coef = coef, nonzero = n, perc.human= coef.perc,
-                       zero.predicted = counts)
+                       zero.predicted = counts, lambda.which = lambda.w, lambda = lambda)
   return(result)
 }
+
+test <- mapply(lasso.negbin.mixed.data, colnames(simData)[c(5,9,13,56,79,104,147,159,193,167)], MoreArgs = list(simData))
+
+
