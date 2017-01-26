@@ -1,9 +1,41 @@
 #library(glmnet)
 #library(Hmisc)
-#mixedSpeciesdata <- mixedSpecies100
+#mixedSpeciesdata <- mixedSpecies1000
 
 #human.simData <- mixedSpeciesdata[grep("HUMAN",rownames(mixedSpeciesdata)),]
 #mouse.simData <- mixedSpeciesdata[grep("MOUSE",rownames(mixedSpeciesdata)),]
+#simData <- rbind(human.simData,mouse.simData)
+
+#human.counts <- colSums(human.simData != 0)
+#mouse.counts <- colSums(mouse.simData != 0)
+
+#mixed.cells <- sort(abs(human.counts - mouse.counts))[1:50]
+#mixed.cells <- names(mixed.cells)
+#simData <- simData[,!(names(simData) %in% mixed.cells)]
+#human.counts <- human.counts[!(names(human.counts) %in% mixed.cells)]
+#mouse.counts <- mouse.counts[!(names(mouse.counts) %in% mixed.cells)]
+
+#human.cells <- colnames(simData)[which(human.counts > mouse.counts)]
+#mouse.cells <- colnames(simData)[which(human.counts < mouse.counts)]
+#human.cell.simData <- simData[,which(human.counts > mouse.counts)]
+#mouse.cell.simData <- simData[,which(human.counts < mouse.counts)]
+#human.cells <- unlist(lapply(human.cells, function(x){ toString(c("HUMAN",x))}))
+#mouse.cells <- unlist(lapply(mouse.cells, function(x){ toString(c("MOUSE",x))}))
+
+#colnames(mouse.cell.simData) <- mouse.cells
+#colnames(human.cell.simData) <- human.cells
+
+#local.means.human <- data.frame(colMeans(human.cell.simData))
+#names(local.means.human) <- c("colMeans")
+#rownames(local.means.human)[order(local.means.human$colMeans, decreasing = TRUE)[1:100]] -> selectedCells.human
+#local.means.mouse <- data.frame(colMeans(mouse.cell.simData))
+#names(local.means.mouse) <- c("colMeans")
+#rownames(local.means.mouse)[order(local.means.mouse$colMeans, decreasing = TRUE)[1:100]] -> selectedCells.mouse
+
+#simData.human <- human.cell.simData[,selectedCells.human]
+#simData.mouse <- mouse.cell.simData[,selectedCells.mouse]
+
+#simData <- cbind(simData.human, simData.mouse)
 
 #local.means.human <- data.frame(rowMeans(human.simData))
 #names(local.means.human) <- c("rowMeans")
@@ -12,10 +44,12 @@
 #names(local.means.mouse) <- c("rowMeans")
 #rownames(local.means.mouse)[order(local.means.mouse$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.mouse
 
-#simData.human <- mixedSpeciesdata[selectedGenes.human,]
-#simData.mouse <- mixedSpeciesdata[selectedGenes.mouse,]
+#simData.human <- simData[selectedGenes.human,]
+#simData.mouse <- simData[selectedGenes.mouse,]
 
 #simData <- rbind(simData.human,simData.mouse)
+
+#####
 
 
 #use simData for analysis of cells
@@ -39,34 +73,44 @@ lasso.mixed.data <- function(ID,simData){
   vec.learn <- simData.learn[,which(colnames(simData.learn)==ID)]
   vec.test <- simData.test[,which(colnames(simData.test)==ID)]
   n = dim(simData_learn)[1] # number of non-zero entries
-  if (dim(simData_learn)[1]>2){ #if there is more than one entry non zero do regression
+  if (n > 12){ #if there is more than one entry non zero do regression
     fit.expr.lin <- glmnet(x = simData_learn, y = log(1+vec.learn),
                            family = "gaussian", standardize = TRUE, alpha = 1)
   
-  if (n>=12){ # if there are more than 9 non zero entries cross-validation is possible
+     # if there are more than 9 non zero entries cross-validation is possible
     cv.expr.lin <- cv.glmnet(x=simData_learn, y = log(1+vec.learn), nfold=3, type.measure="mse")
     prediction <- predict(fit.expr.lin, newx = simData_test, s = c(cv.expr.lin$lambda.min))
-    prediction2 <- exp(prediction)-1
-    cov <- sum(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)
-  } else { # if there are less than 9 non zero entries compare results with mse
-    prediction.lin <- predict(fit.expr.lin, newx = simData_test)
-    test <- apply(prediction.lin,2,function(x) mean(((exp(x)-1))^2))
-    prediction <- prediction.lin[,which(test == min(test))[1]]
-    if (is.na(fit.expr.lin$lambda)[1]){
-      cov = NaN
-    } else {
-      j  <- which(test == min(test))[1]
-    cov <- sum(coef(fit.expr.lin, s = fit.expr.lin$lambda[j])!=0) }}
+    prediction <- exp(prediction)-1
+    coef <- sum(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)
+    
+    if (length(grep("HUMAN",colnames(simData)[i]))>0){
+      test <- colnames(simData)[which(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)]
+      H.coef <- grep("HUMAN",test)
+      coef.perc <- length(H.coef)/coef
+      M.test <- grep("MOUSE",rownames(prediction))
+      prediction.new <- prediction[M.test]
+      counts <- sum(prediction.new == 0)
+      mse.lin <- mean(prediction.new)
+    }else{
+      test <- colnames(simData)[which(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)]
+      H.coef <- grep("HUMAN",test)
+      coef.perc <- length(H.coef)/coef
+      H.test <- grep("HUMAN",rownames(prediction))
+      prediction.new <- prediction[H.test,drop=FALSE]
+      counts <- sum(prediction.new == 0)
+      mse.lin <- mean(prediction.new)
+    }
   
-  mse.lin <- mean(((exp(prediction)-1))^2)
   }else{
     mse.lin = NaN
-    Spear_corr = NaN
-    cov = NaN
+    coef = NaN
+    coef.perc = NaN
+    counts = NaN
   }
   
-  result <- data.frame(mse = mse.lin, number.cov = cov, nonzero = n)
+  result <- data.frame(mse = mse.lin, number.coef = coef, nonzero = n, perc.human = coef.perc,
+                       zero.predicted = counts)
   return(result)
 }
 
-#resultgenes <- mapply(lasso.mixed.data, rownames(simData), MoreArgs = list(t(simData)))
+#resultgenes <- mapply(lasso.mixed.data, rownames(simData)[1:15], MoreArgs = list(t(simData)))

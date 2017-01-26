@@ -3,8 +3,10 @@
 \docType{class}
 \name{DropoutSimulation}
 \alias{DropoutSimulation}
-\alias{plot}
-\alias{plot,DropoutSimulation-method}
+\alias{plot.cells}
+\alias{plot.cells,DropoutSimulation-method}
+\alias{plot.genes}
+\alias{plot.genes,DropoutSimulation-method}
 \alias{simulateDropoutCells}
 \alias{simulateDropoutCells,DropoutSimulation-method}
 \alias{simulateDropoutGene}
@@ -21,9 +23,14 @@ simulateDropoutCells(theObject, expressionData, dropoutPercentage, n)
 \S4method{simulateDropoutCells}{DropoutSimulation}(theObject, expressionData,
   dropoutPercentage, n)
 
-plot(theObject, type = "compare", p = 0)
+plot.cells(theObject, type = "compare", p = 0)
 
-\S4method{plot}{DropoutSimulation}(theObject, type = "compare", p = 0)
+\S4method{plot.cells}{DropoutSimulation}(theObject, type = "compare", p = 0)
+
+plot.genes(theObject, type = "compare", p = 0, ...)
+
+\S4method{plot.genes}{DropoutSimulation}(theObject, type = "compare", p = 0,
+  originalData = NULL, methodAttr = NULL)
 }
 \arguments{
 \item{theObject}{an object of the DropoutSimulation class}
@@ -49,6 +56,12 @@ genes as rows and cells as columns}
 \item{n}{the number of simulations for each dropout}
 
 \item{theObject}{an object of the DropoutSimulation class containing simulation results}
+
+\item{theObject}{an object of the DropoutSimulation class containing simulation results}
+
+\item{type}{the type of graph to plot, "compare" will plot difference of mse(also the default value)}
+
+\item{p}{the dropout percentage to plot, default: 0 will consider the whole range}
 }
 \description{
 This class has slots to store results of different simulations
@@ -58,7 +71,9 @@ Simulations on genes with dependency on cells
 
 Simulations on cells with dependency on genes
 
-This function plots graphs to help analyse between lasso and knn approaches.
+This function plots graphs to help analyse between lasso and knn approaches for cell-based imputation.
+
+This function plots graphs to help analyse between lasso and knn approaches for gene-based imputation.
 }
 \section{Slots}{
 
@@ -75,4 +90,7 @@ where genes are imputed as function of cells}
 \item{\code{simulation.result.cells}}{a list storing results of all simulations
 where cells are imputed as functions of genes}
 }}
+\examples{
+t <- DropoutSimulation()
+}
 

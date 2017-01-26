@@ -16,6 +16,9 @@
 #' @rdname DropoutSimulation
 #' @importFrom methods new
 #' @exportClass DropoutSimulation
+#' 
+#' @examples
+#' t <- DropoutSimulation()
 
 DropoutSimulation <- setClass("DropoutSimulation",
                               slots = 
@@ -57,9 +60,7 @@ setMethod(f = "simulateDropoutGene",
             theObject@n <- n
             
             # select 500 most abundantly expressed genes
-            local.means <- data.frame(rowMeans(expressionData))
-            names(local.means) <- c("rowMeans")
-            rownames(local.means)[order(local.means$rowMeans, decreasing = TRUE)[1:500]] -> local.selectedGenes
+            Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
             expressionData[local.selectedGenes, ] -> local.simData
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
@@ -122,9 +123,7 @@ setMethod(f = "simulateDropoutCells",
             theObject@n <- n
             
             # select 500 most abundantly expressed genes
-            local.means <- data.frame(rowMeans(expressionData))
-            names(local.means) <- c("rowMeans")
-            rownames(local.means)[order(local.means$rowMeans, decreasing = TRUE)[1:500]] -> local.selectedGenes
+            Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
             expressionData[local.selectedGenes, ] -> local.simData
             colnames(local.simData) <- gsub("[_?]", "", gsub("^[0-9]", "X", colnames(local.simData), perl = TRUE), perl = TRUE)
             for (p in theObject@dropout.percentage) {
@@ -159,6 +158,43 @@ setMethod(f = "simulateDropoutCells",
             return(theObject)
           })
 
+#' Plot imputed values for genes
+#' 
+#' This function plots the observed v/s predicted values for gene imputation.
+#' 
+#' @param expressionData the data of gene expression values
+#' @param geneID the geneID to plot
+#' 
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @importFrom ggplot2 ggplot aes labs
+#' @exportMethod plot.predict.gene
+
+setGeneric(name = "plot.predict.gene",
+           def = function(expressionData, drop.percent, geneID) {
+             standardGeneric("plot.predict.gene")
+           })
+
+#' @rdname DropoutSimulation
+#' @docType methods
+#' @export
+setMethod(f = "plot.predict.gene",
+          signature = "ANY",
+          definition = function(expressionData, drop.percent, geneID) {
+            Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
+            expressionData[local.selectedGenes, ] -> local.simData
+            sample(colnames(expressionData), drop.percent*ncol(expressionData)) -> local.selectedCells
+            
+            original.values <- local.simData[geneID, local.selectedCells]
+            predicted.values <- kknnImpute(geneID,
+                                           as.data.frame(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
+                                           as.data.frame(t(local.simData[, local.selectedCells])), predicted = TRUE)
+            plotData <- data.frame(original.values, predicted.values)
+            kknnPlot <- ggplot(plotData, aes(y=predicted.values, x=original.values, color=predicted.values)) + geom_point() + geom_line(aes(y=original.values))
+            kknnPlot <- kknnPlot + labs(title = paste("Predicted values for gene:", geneID, ", Dropout:", drop.percent, ", Method: kknn"))
+            return(kknnPlot)
+          })
+
 #' Analysis of simulation results for cells
 #' 
 #' This function plots graphs to help analyse between lasso and knn approaches for cell-based imputation.
@@ -170,7 +206,8 @@ setMethod(f = "simulateDropoutCells",
 #' @rdname DropoutSimulation
 #' @docType methods
 #' @importFrom ggplot2 ggplot aes labs geom_density
-#' @exportMethod plot
+#' @exportMethod plot.cells
+
 setGeneric(name = "plot.cells",
            def = function(theObject, type = "compare", p = 0) {
              standardGeneric("plot.cells")
@@ -221,9 +258,9 @@ setMethod(f = "plot.cells",
 #' @rdname DropoutSimulation
 #' @docType methods
 #' @importFrom ggplot2 ggplot aes labs geom_density
-#' @exportMethod plot
+#' @exportMethod plot.genes
 setGeneric(name = "plot.genes",
-           def = function(theObject, type = "compare", p = 0) {
+           def = function(theObject, type = "compare", p = 0, ...) {
              standardGeneric("plot.genes")
            })
 
@@ -232,7 +269,7 @@ setGeneric(name = "plot.genes",
 #' @export
 setMethod(f = "plot.genes",
           signature = "DropoutSimulation",
-          definition = function(theObject, type = "compare", p = 0){
+          definition = function(theObject, type = "compare", p = 0, originalData = NULL, methodAttr = NULL){
             if(0 == length(theObject@simulation.result.genes)) {
               stop("The object does not have the data for gene-based imputation.")
             }
@@ -256,7 +293,21 @@ setMethod(f = "plot.genes",
                 plotObject <- plotObject + labs(title = paste("MSE differences (lasso-knn) over", p, "dropout"), x = "mse(lasso)-mse(knn)")
               }
               return(plotObject)
-            } else {
+            } else if(type == "variance"){
+              if(is.null(originalData) || is.null(methodAttr)){
+                stop("The actual data needs to be provided for this plot.")
+              }
+              x <- sample(Filter(function(x) {return((attr(x, "method") == methodAttr) && (p==0 || attr(x, "drop-percentage") == p))}, theObject@simulation.result.genes), 1)
+              geneMse <- unlist(x[[1]]["mse",])
+              geneCor <- cor(t(originalData[colnames(x[[1]]),]))
+              # remove variances from the correlation matrix
+              diag(geneCor) <- rep(0, length(diag(geneCor)))
+              geneVars <- apply(X =  abs(geneCor), MARGIN = 2, FUN = mean)
+              plotData <- data.frame(geneMse, geneVars)
+              plotObject <- ggplot(plotData, aes(x=geneVars, y=geneMse, color=geneMse)) + geom_point()
+              plotObject <- plotObject + labs(title = paste("Method:", attr(x[[1]], "method"), ", Dropout:", attr(x[[1]], "drop-percentage")))
+              return(plotObject)
+            }else {
               stop("Invalid parameters specified")
             }
           })

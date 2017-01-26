@@ -13,7 +13,7 @@
 #' @importFrom randomForest train.randomForest
 #' @importFrom Hmisc rcorr
 #' @export
-randomForestImpute <- function(id, simData.learn, simData.test) {
+randomForestImpute <- function(id, simData.learn, simData.test, mixedSpeciesData = FALSE) {
   takeout<-which(colnames(simData.learn)==id)
   # r <- randomForest(as.formula(paste(id, ".", sep = "~")), simData.learn[,-takeout],simData.learn[,id])
   r <- randomForest(simData.learn[,-takeout],simData.learn[,id])
@@ -22,13 +22,24 @@ randomForestImpute <- function(id, simData.learn, simData.test) {
   x <- data.frame(simData.test[,id])
   x$predicted = genePredict
   
-  if (dim(as.matrix(x))>4){
+  if (dim(x)[1]>4){
     c <- rcorr(as.matrix(x), type = "spearman")
     outputList <- data.frame(mse = mse, Spear_corr = c$r[1,2])}
   else{
     outputList <- data.frame(mse = mse, Spear_corr <- NA)
     }
 
+  if(TRUE == mixedSpeciesData) {
+    if(length(grep("HUMAN", id)) > 0) {
+      zeroPredictions = sum(x$predicted[grep("MOUSE", rownames(simData.test))] == 0)
+      outputList$mse = mean(x$predicted[grep("MOUSE", rownames(simData.test))])
+    } else {
+      zeroPredictions = sum(x$predicted[grep("HUMAN", rownames(simData.test))] == 0)
+      outputList$mse = mean(x$predicted[grep("HUMAN", rownames(simData.test))])
+    }
+    outputList$zero.predicted = zeroPredictions
+  }
+  
   return(outputList)
 }
 #' Random Forest imputation - multiple columns

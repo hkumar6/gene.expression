@@ -19,3 +19,6 @@ where genes are imputed as function of cells}
 where cells are imputed as functions of genes}
 }}
 
+\examples{
+t <- mixedSpeciesImput()
+}
