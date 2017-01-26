@@ -1,4 +1,4 @@
-#' kknn imputation - single column
+#' randonForest imputation
 #' 
 #' Impute results for a specific gene or cell using randomForest
 #' 
@@ -54,7 +54,7 @@ randomForestImpute <- function(id, simData.learn, simData.test, mixedSpeciesData
 #'      mean squared error, Spearman correlation, optimal parameters for kknn
 #'
 #' @importFrom stats coef predict
-#' @importFrom glmnet glmnet cv.glmnet
+#' @importFrom randomForest
 #' @importFrom Hmisc rcorr
 #' @export
 randomForestImputeAll <- function(selectedList, simData.learn, simData.test) {
