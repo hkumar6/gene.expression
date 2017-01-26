@@ -75,13 +75,14 @@ lasso.mixed.data <- function(ID,simData){
   n = dim(simData_learn)[1] # number of non-zero entries
   if (n > 12){ #if there is more than one entry non zero do regression
     fit.expr.lin <- glmnet(x = simData_learn, y = log(1+vec.learn),
-                           family = "gaussian", standardize = TRUE, alpha = 1)
+                          family = "gaussian", standardize = TRUE, alpha = 1)
   
-     # if there are more than 9 non zero entries cross-validation is possible
-    cv.expr.lin <- cv.glmnet(x=simData_learn, y = log(1+vec.learn), nfold=3, type.measure="mse")
-    prediction <- predict(fit.expr.lin, newx = simData_test, s = c(cv.expr.lin$lambda.min))
+    # if there are more than 9 non zero entries cross-validation is possible
+    cv.expr.lin <- cv.glmnet(x=log(1+simData_learn), y = log(1+vec.learn), nfold=5, type.measure="mse")
+    prediction <- predict(cv.expr.lin$glmnet.fit, newx = simData_test, s = c(cv.expr.lin$lambda.min))
     prediction <- exp(prediction)-1
     coef <- sum(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)
+    lambda <- cv.expr.lin$lambda.min
     
     if (length(grep("HUMAN",colnames(simData)[i]))>0){
       test <- colnames(simData)[which(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)]
@@ -106,11 +107,15 @@ lasso.mixed.data <- function(ID,simData){
     coef = NaN
     coef.perc = NaN
     counts = NaN
+    lambda = NaN
   }
   
   result <- data.frame(mse = mse.lin, number.coef = coef, nonzero = n, perc.human = coef.perc,
-                       zero.predicted = counts)
+                       zero.predicted = counts, lambda = lambda)
   return(result)
 }
 
-#resultgenes <- mapply(lasso.mixed.data, rownames(simData)[1:15], MoreArgs = list(t(simData)))
+resultgenes <- mapply(lasso.mixed.data, sample(colnames(simData),50), MoreArgs = list((simData)))
+#0.0058 for genes
+#0.0185 for cells
+
