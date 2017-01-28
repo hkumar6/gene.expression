@@ -1,3 +1,16 @@
+#' kknn imputation for mixed species data
+#' 
+#' Impute results for a specific gene or cell using kknn
+#' 
+#' @param id string for the cell or gene to impute, must be a column name in the data
+#' @param simData a matrix containing all the gene expression counts
+#' 
+#' @return data.frame containing results of the simulation
+#'      mean squared error, Spearman correlation, optimal parameters for kknn
+#'
+#' @export
+
+
 kknn.mixed.data <- function(id,simData){
   
   # define all zero entries of ID as test

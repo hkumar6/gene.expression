@@ -7,6 +7,8 @@
 \alias{plot.cells,DropoutSimulation-method}
 \alias{plot.genes}
 \alias{plot.genes,DropoutSimulation-method}
+\alias{plot.predict.gene}
+\alias{plot.predict.gene,ANY-method}
 \alias{simulateDropoutCells}
 \alias{simulateDropoutCells,DropoutSimulation-method}
 \alias{simulateDropoutGene}
@@ -22,6 +24,10 @@ simulateDropoutCells(theObject, expressionData, dropoutPercentage, n)
 
 \S4method{simulateDropoutCells}{DropoutSimulation}(theObject, expressionData,
   dropoutPercentage, n)
+
+plot.predict.gene(expressionData, drop.percent, geneID)
+
+\S4method{plot.predict.gene}{ANY}(expressionData, drop.percent, geneID)
 
 plot.cells(theObject, type = "compare", p = 0)
 
@@ -42,6 +48,8 @@ genes as rows and cells as columns}
 
 \item{n}{the number of simulations for each dropout}
 
+\item{geneID}{the geneID to plot}
+
 \item{type}{the type of graph to plot, "compare" will plot difference of mse(also the default value)}
 
 \item{p}{the dropout percentage to plot, default: 0 will consider the whole range}
@@ -54,6 +62,8 @@ genes as rows and cells as columns}
 \item{dropoutPercentage}{a vector specifying dropout percentages to simulate}
 
 \item{n}{the number of simulations for each dropout}
+
+\item{expressionData}{the data of gene expression values}
 
 \item{theObject}{an object of the DropoutSimulation class containing simulation results}
 
@@ -70,6 +80,8 @@ using Lasso and kknn methods.
 Simulations on genes with dependency on cells
 
 Simulations on cells with dependency on genes
+
+This function plots the observed v/s predicted values for gene imputation.
 
 This function plots graphs to help analyse between lasso and knn approaches for cell-based imputation.
 
@@ -90,7 +102,4 @@ where genes are imputed as function of cells}
 \item{\code{simulation.result.cells}}{a list storing results of all simulations
 where cells are imputed as functions of genes}
 }}
-\examples{
-t <- DropoutSimulation()
-}
 

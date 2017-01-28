@@ -1,8 +1,20 @@
-
-lasso.negbin.mixed.data <- function(ID,simData){
+#' lasso imputation - single column
+#' 
+#' Impute results for a specific gene or cell using lasso
+#' 
+#' @param ID string for the cell or gene to impute, must be a column name in the data
+#' @param simData data
+#' @param genes TRUE/FALSE depending on wether genes are analysed
+#' 
+#' @return data.frame containing results of the simulation
+#'      mean error, percentage of humans
+#'
+#' @importFrom mpath glmreg cv.glmreg
+#' @export
+#' 
+lasso.negbin.mixed.data <- function(ID,simData, genes = TRUE){
   i = which(colnames(simData)==ID)
   
-  print(i)
   #formate for lasso function
   simData <- as.data.frame((simData)) 
   
@@ -19,51 +31,55 @@ lasso.negbin.mixed.data <- function(ID,simData){
   vec.test <- simData.test[,which(colnames(simData.test)==ID)]
   n = dim(simData_learn)[1] # number of non-zero entries
   if (dim(simData_learn)[1]>2 && dim(simData_test)[1]>2){ #if there is more than one entry non zero do regression
-    #fit.expr.bin <- glmreg(vec.learn ~ ., data = simData_learn, family = "negbin",  theta=1, alpha = 1)
-    cv.bin <- cv.glmreg(vec.learn ~ ., data = simData_learn, family = "negbin",  theta=1, nfold = 5, alpha = 1)
-    #prediction <- predict(fit.expr.bin, newx = simData_test, which =cv.bin$lambda.which, type = "response")
+    fit.expr.bin <- glmreg(vec.learn ~ ., data = simData_learn, family = "negbin",  theta=1, alpha = 1)
+    #cv.bin <- cv.glmreg(vec.learn ~ ., data = simData_learn, family = "negbin",  theta=1, nfold = 5, alpha = 1)
     
-    lambda <- cv.bin$lambda.optim
-    lambda.w <- cv.bin$lambda.which
+    if (genes){
+      lambda = 0.0065
+    }else{
+      lambda = 0.2
+    }
     
-    #coef = sum(coef(cv.bin$fit, which = 30) !=0)
-    #if (length(grep("HUMAN",colnames(simData)[i]))>0){
-     # test <- colnames(simData)[which(coef(fit.expr.bin, which = 30)!=0)]
-      #H.coef <- grep("HUMAN",test)
-      #coef.perc <- length(H.coef)/coef
-      #M.test <- grep("MOUSE",rownames(simData_test))
-      #prediction.new <- prediction[M.test]
-      #counts <- sum(prediction.new == 0)
-      #mse.bin <- mean(prediction.new)
-    #}else{
-     # test <- colnames(simData)[which(coef(fit.expr.bin, which = 30)!=0)]
-      #H.coef <- grep("HUMAN",test)
-      #coef.perc <- length(H.coef)/coef
-      #H.test <- grep("HUMAN",rownames(simData_test))
-      #prediction.new <- prediction[H.test,drop=FALSE]
-      #counts <- sum(prediction.new == 0)
-      #mse.bin <- mean(prediction.new)
-  #  }
+    lambda.pos <- which(abs(fit.expr.bin$lambda-lambda) == min(abs(fit.expr.bin$lambda-lambda)))
+    prediction <- predict(fit.expr.bin, newx = simData_test, which = lambda.pos, type = "response")
+    
+    coef = sum(coef(fit.expr.bin, which = lambda.pos) !=0)
+    if (length(grep("HUMAN",colnames(simData)[i]))>0){
+      test <- colnames(simData)[which(coef(fit.expr.bin, which = lambda.pos)!=0)]
+      H.coef <- grep("HUMAN",test)
+      coef.perc <- length(H.coef)/coef
+      M.test <- grep("MOUSE",rownames(simData_test))
+      prediction.new <- prediction[M.test]
+      counts <- sum(prediction.new == 0)
+      mse.bin <- mean(prediction.new)
+    }else{
+      test <- colnames(simData)[which(coef(fit.expr.bin, which = lambda.pos)!=0)]
+      H.coef <- grep("HUMAN",test)
+      coef.perc <- length(H.coef)/coef
+      H.test <- grep("HUMAN",rownames(simData_test))
+      prediction.new <- prediction[H.test,drop=FALSE]
+      counts <- sum(prediction.new == 0)
+      mse.bin <- mean(prediction.new)
+    }
     
   }else{
     mse.bin = NaN
     coef = NaN
     coef.perc = NaN
     counts = NaN
-    lambda = NaN
-    lambda.w = NaN
   }
-  result <- data.frame(lambda.which = lambda.w, lambda = lambda) #mse = mse.bin, number.coef = coef, nonzero = n, perc.human= coef.perc,
-  #zero.predicted = counts,
+  result <- data.frame(mean.error = mse.bin, number.coef = coef, nonzero = n, perc.human= coef.perc,
+                       zero.predicted = counts)
   return(result)
 }
 
-system.time(
-test <- mapply(lasso.negbin.mixed.data, sample(rownames(simData),50), MoreArgs = list(t(simData))))
+#system.time(
+ # test <- mapply(lasso.negbin.mixed.data, sample(rownames(simData),50), MoreArgs = list(t(simData))))
 
 #system.time(
- # test <- mapply(lasso.mixed.data, colnames(simData)[c(9)], MoreArgs = list(simData)))
+#test <- mapply(lasso.negbin.mixed.data, rownames(simData)[22], MoreArgs = list(t(simData))))
 
-#system.time(
- # test <- mapply(randomForest.mixed.data, colnames(simData)[c(9)], MoreArgs = list(simData)))
+#cells lambda 0.2
+#genes 0.0065
+
 

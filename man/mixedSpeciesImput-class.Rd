@@ -7,7 +7,7 @@
 \title{The mixedSpeciesImput class}
 \description{
 This class has slots to store results of different simulations
-using Lasso and kknn methods.
+using Lasso, Random Forest and kknn methods.
 }
 \section{Slots}{
 
@@ -19,6 +19,3 @@ where genes are imputed as function of cells}
 where cells are imputed as functions of genes}
 }}
 
-\examples{
-t <- mixedSpeciesImput()
-}

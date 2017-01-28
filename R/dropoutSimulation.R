@@ -16,9 +16,7 @@
 #' @rdname DropoutSimulation
 #' @importFrom methods new
 #' @exportClass DropoutSimulation
-#' 
-#' @examples
-#' t <- DropoutSimulation()
+
 
 DropoutSimulation <- setClass("DropoutSimulation",
                               slots = 
@@ -66,32 +64,34 @@ setMethod(f = "simulateDropoutGene",
               for (simID in 1:n) {
                 sample(colnames(expressionData), p*ncol(expressionData)) -> local.selectedCells
               
-                # simulation for random forest
-                td <- mapply(randomForestImpute, local.selectedGenes,
-                             MoreArgs = list(as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
-                                             as.matrix(t(local.simData[, local.selectedCells]))))
-                theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
-                attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "drop-percentage") <- p
-                attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "randomForest"
+                # # simulation for random forest
+                # td <- mapply(randomForestImpute, local.selectedGenes,
+                #              MoreArgs = list(as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
+                #                              as.matrix(t(local.simData[, local.selectedCells]))))
+                # theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
+                # attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "drop-percentage") <- p
+                # attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "randomForest"
                 
                 
-                # simulation for lasso
-                td <- mapply(lassoImpute, local.selectedGenes,
-                             MoreArgs = list(as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
-                                             as.matrix(t(local.simData[, local.selectedCells]))))
-                theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
-                attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "drop-percentage") <- p
-                attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "lasso"
+                # # simulation for lasso
+                # td <- mapply(lassoImpute, local.selectedGenes,
+                #              MoreArgs = list(as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
+                #                              as.matrix(t(local.simData[, local.selectedCells]))))
+                # theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
+                # attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "drop-percentage") <- p
+                # attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "lasso"
 
 
 
                 # simulation for kknn
-                td <- mapply(kknnImpute, local.selectedGenes,
-                             MoreArgs = list(as.data.frame(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
-                                             as.data.frame(t(local.simData[, local.selectedCells]))))
-                theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
-                attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "drop-percentage") <- p
-                attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "kknn"
+                kknnImpute(local.selectedGenes[1], as.data.frame(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
+                           as.data.frame(t(local.simData[, local.selectedCells])))
+                # td <- mapply(kknnImpute, local.selectedGenes,
+                #              MoreArgs = list(as.data.frame(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
+                #                              as.data.frame(t(local.simData[, local.selectedCells]))))
+                # theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
+                # attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "drop-percentage") <- p
+                # attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "kknn"
               }
             }
             return(theObject)
@@ -266,6 +266,8 @@ setGeneric(name = "plot.genes",
 
 #' @rdname DropoutSimulation
 #' @docType methods
+#' @importFrom stats cor
+#' @importFrom ggplot2 geom_point geom_line
 #' @export
 setMethod(f = "plot.genes",
           signature = "DropoutSimulation",
