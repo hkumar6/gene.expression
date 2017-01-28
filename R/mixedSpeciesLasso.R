@@ -55,11 +55,11 @@
 #use simData for analysis of cells
 #use t(simData) for analysis of genes
 
-lasso.mixed.data <- function(ID,simData){
+lasso.mixed.data <- function(ID,simData, genes = TRUE){
   i = which(colnames(simData)==ID)
   
   #formate for lasso function
-  simData <- as.matrix(simData) 
+  simData <- as.matrix((simData)) 
   
   #define test and learn data
   simData.test <- simData[which(simData[,i]==0),,drop=FALSE] # define all zero entries of ID as test
@@ -73,19 +73,23 @@ lasso.mixed.data <- function(ID,simData){
   vec.learn <- simData.learn[,which(colnames(simData.learn)==ID)]
   vec.test <- simData.test[,which(colnames(simData.test)==ID)]
   n = dim(simData_learn)[1] # number of non-zero entries
-  if (n > 12){ #if there is more than one entry non zero do regression
-    fit.expr.lin <- glmnet(x = simData_learn, y = log(1+vec.learn),
+  if (n > 2){ #if there is more than one entry non zero do regression
+    fit.expr.lin <- glmnet(x = log(1+simData_learn), y = log(1+vec.learn),
                           family = "gaussian", standardize = TRUE, alpha = 1)
   
     # if there are more than 9 non zero entries cross-validation is possible
-    cv.expr.lin <- cv.glmnet(x=log(1+simData_learn), y = log(1+vec.learn), nfold=5, type.measure="mse")
-    prediction <- predict(cv.expr.lin$glmnet.fit, newx = simData_test, s = c(cv.expr.lin$lambda.min))
+    #cv.expr.lin <- cv.glmnet(x=log(1+simData_learn), y = log(1+vec.learn), nfold=5, type.measure="mse")
+    if (genes){
+      lambda = 0.0058
+    }else{
+      lambda = 0.0185  
+    }
+    prediction <- predict(fit.expr.lin, newx = log(1+simData_test), s = lambda) 
     prediction <- exp(prediction)-1
-    coef <- sum(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)
-    lambda <- cv.expr.lin$lambda.min
-    
+    coef <- sum(coef(fit.expr.lin, lambda)!=0)
+
     if (length(grep("HUMAN",colnames(simData)[i]))>0){
-      test <- colnames(simData)[which(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)]
+      test <- colnames(simData)[which(coef(fit.expr.lin, lambda)!=0)]
       H.coef <- grep("HUMAN",test)
       coef.perc <- length(H.coef)/coef
       M.test <- grep("MOUSE",rownames(prediction))
@@ -93,7 +97,7 @@ lasso.mixed.data <- function(ID,simData){
       counts <- sum(prediction.new == 0)
       mse.lin <- mean(prediction.new)
     }else{
-      test <- colnames(simData)[which(coef(fit.expr.lin, cv.expr.lin$lambda.min)!=0)]
+      test <- colnames(simData)[which(coef(fit.expr.lin, lambda)!=0)]
       H.coef <- grep("HUMAN",test)
       coef.perc <- length(H.coef)/coef
       H.test <- grep("HUMAN",rownames(prediction))
@@ -107,15 +111,15 @@ lasso.mixed.data <- function(ID,simData){
     coef = NaN
     coef.perc = NaN
     counts = NaN
-    lambda = NaN
   }
   
-  result <- data.frame(mse = mse.lin, number.coef = coef, nonzero = n, perc.human = coef.perc,
-                       zero.predicted = counts, lambda = lambda)
+  result <- data.frame(mean.error = mse.lin, number.coef = coef, nonzero = n, perc.human = coef.perc,
+                       zero.predicted = counts)
   return(result)
 }
 
 #resultgenes <- mapply(lasso.mixed.data, sample(colnames(simData),50), MoreArgs = list((simData)))
+#resultgenes <- mapply(lasso.mixed.data,colnames(simData)[1:10], MoreArgs = list((simData), genes=FALSE))
 #0.0058 for genes
 #0.0185 for cells
 

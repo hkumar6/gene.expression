@@ -88,16 +88,6 @@ setMethod(f = "mixedSpeciesGene",
             simData.mouse <- simData[selectedGenes.mouse,]
             
             simData <- rbind(simData.human,simData.mouse)
-            
-            # simulation for random forest
-            rownames(simData) <- gsub("[_:-]", "", rownames(simData), perl = TRUE)
-            td <- mapply(randomForest.mixed.data, rownames(simData),
-                         MoreArgs = list(t(as.data.frame(simData))))
-            theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
-            attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "randomForest"
-            
-
-            simData <- cbind(human.cell.simData, mouse.cell.simData)
 
             # simulation for random forest
             rownames(simData) <- gsub("[_:-]", "", rownames(simData), perl = TRUE)
@@ -105,17 +95,16 @@ setMethod(f = "mixedSpeciesGene",
                          MoreArgs = list(t(as.data.frame(simData))))
             theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
             attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "randomForest"
-
 
             # simulation for lasso
             td <- mapply(lasso.mixed.data, rownames(simData),
-                         MoreArgs = list(t(simData)))
+                         MoreArgs = list(t(simData),genes = TRUE))
             theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
             attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "lasso"
             
             # simulation for lasso Negative Binomial
             td <- mapply(lasso.negbin.mixed.data, rownames(simData),
-                         MoreArgs = list(t(simData)))
+                         MoreArgs = list(t(simData),genes = TRUE))
             theObject@simulation.result.genes[[length(theObject@simulation.result.genes)+1]] <- td
             attr(theObject@simulation.result.genes[[length(theObject@simulation.result.genes)]], "method") <- "lassoNegBin"
             
@@ -194,22 +183,22 @@ setMethod(f = "mixedSpeciesCells",
             simData.mouse <- simData[selectedGenes.mouse,]
             
             simData <- rbind(simData.human,simData.mouse)
+            
             # simulation for random forest
             td <- mapply(randomForest.mixed.data, colnames(simData),
                          MoreArgs = list(simData))
             theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
             attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "randomForest"
             
-            
             # simulation for lasso
             td <- mapply(lasso.mixed.data, colnames(simData),
-                         MoreArgs = list(simData))
+                         MoreArgs = list(simData, genes = FALSE))
             theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
             attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "lasso"
             
             # simulation for lasso Negative Binomial
             td <- mapply(lasso.negbin.mixed.data, colnames(simData),
-                         MoreArgs = list(simData))
+                         MoreArgs = list(simData, genes = FALSE))
             theObject@simulation.result.cells[[length(theObject@simulation.result.cells)+1]] <- td
             attr(theObject@simulation.result.cells[[length(theObject@simulation.result.cells)]], "method") <- "lassoNegBin"
             
