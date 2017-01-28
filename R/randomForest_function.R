@@ -1,4 +1,4 @@
-#' kknn imputation - single column
+#' randomForest imputation - single column
 #' 
 #' Impute results for a specific gene or cell using randomForest
 #' 
