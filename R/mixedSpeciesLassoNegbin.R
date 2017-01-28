@@ -58,8 +58,8 @@ lasso.negbin.mixed.data <- function(ID,simData){
   return(result)
 }
 
-system.time(
-test <- mapply(lasso.negbin.mixed.data, sample(rownames(simData),50), MoreArgs = list(t(simData))))
+#system.time(
+ # test <- mapply(lasso.negbin.mixed.data, sample(rownames(simData),50), MoreArgs = list(t(simData))))
 
 #system.time(
  # test <- mapply(lasso.mixed.data, colnames(simData)[c(9)], MoreArgs = list(simData)))

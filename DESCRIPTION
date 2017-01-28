@@ -15,7 +15,8 @@ Imports:
     glmnet,
     kknn,
     mpath,
-    ggplot2
+    ggplot2,
+    randomForest
 Collate:
     'kknn-functions.R'
     'lasso-functions.R'
@@ -26,5 +27,6 @@ Collate:
     'mixedSpeciesRandomForest.R'
     'dropoutSimulation.R'
     'mixedSpeciesImput.R'
+    'pbmcClass.R'
 RoxygenNote: 5.0.1
 LazyData: true
