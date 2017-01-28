@@ -5,7 +5,7 @@
 \title{kknn imputation - single column}
 \usage{
 kknnImpute(id, simData.learn, simData.test, kmaxParam = 40,
-  mixedSpeciesData = FALSE)
+  mixedSpeciesData = FALSE, predicted = FALSE)
 }
 \arguments{
 \item{id}{string for the cell or gene to impute, must be a column name in the data}

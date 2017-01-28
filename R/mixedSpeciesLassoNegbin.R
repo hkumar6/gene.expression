@@ -61,6 +61,9 @@ lasso.negbin.mixed.data <- function(ID,simData, genes = TRUE){
 }
 
 #system.time(
+ # test <- mapply(lasso.negbin.mixed.data, sample(rownames(simData),50), MoreArgs = list(t(simData))))
+
+#system.time(
 #test <- mapply(lasso.negbin.mixed.data, rownames(simData)[22], MoreArgs = list(t(simData))))
 
 #cells lambda 0.2

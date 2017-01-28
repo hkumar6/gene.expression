@@ -118,6 +118,7 @@ lasso.mixed.data <- function(ID,simData, genes = TRUE){
   return(result)
 }
 
+#resultgenes <- mapply(lasso.mixed.data, sample(colnames(simData),50), MoreArgs = list((simData)))
 #resultgenes <- mapply(lasso.mixed.data,colnames(simData)[1:10], MoreArgs = list((simData), genes=FALSE))
 #0.0058 for genes
 #0.0185 for cells
