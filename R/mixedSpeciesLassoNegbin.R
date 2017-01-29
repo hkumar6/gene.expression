@@ -1,4 +1,17 @@
-
+#' lasso imputation - single column
+#' 
+#' Impute results for a specific gene or cell using lasso
+#' 
+#' @param ID string for the cell or gene to impute, must be a column name in the data
+#' @param simData data
+#' @param genes TRUE/FALSE depending on wether genes are analysed
+#' 
+#' @return data.frame containing results of the simulation
+#'      mean error, percentage of humans
+#'
+#' @importFrom mpath glmreg cv.glmreg
+#' @export
+#' 
 lasso.negbin.mixed.data <- function(ID,simData, genes = TRUE){
   i = which(colnames(simData)==ID)
   

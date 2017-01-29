@@ -1,55 +1,23 @@
 #library(glmnet)
 #library(Hmisc)
-#mixedSpeciesdata <- mixedSpecies1000
+#library(mpath)
+#library(kknn)
+#library(randomForest)
 
-#human.simData <- mixedSpeciesdata[grep("HUMAN",rownames(mixedSpeciesdata)),]
-#mouse.simData <- mixedSpeciesdata[grep("MOUSE",rownames(mixedSpeciesdata)),]
-#simData <- rbind(human.simData,mouse.simData)
+#' lasso imputation - single column
+#' 
+#' Impute results for a specific gene or cell using lasso
+#' 
+#' @param ID string for the cell or gene to impute, must be a column name in the data
+#' @param simData data
+#' @param genes TRUE/FALSE depending on wether genes are analysed
+#' 
+#' @return data.frame containing results of the simulation
+#'      mean error, percentage of humans
+#'
+#' @importFrom glmnet glmnet cv.glmnet
+#' @export
 
-#human.counts <- colSums(human.simData != 0)
-#mouse.counts <- colSums(mouse.simData != 0)
-
-#mixed.cells <- sort(abs(human.counts - mouse.counts))[1:50]
-#mixed.cells <- names(mixed.cells)
-#simData <- simData[,!(names(simData) %in% mixed.cells)]
-#human.counts <- human.counts[!(names(human.counts) %in% mixed.cells)]
-#mouse.counts <- mouse.counts[!(names(mouse.counts) %in% mixed.cells)]
-
-#human.cells <- colnames(simData)[which(human.counts > mouse.counts)]
-#mouse.cells <- colnames(simData)[which(human.counts < mouse.counts)]
-#human.cell.simData <- simData[,which(human.counts > mouse.counts)]
-#mouse.cell.simData <- simData[,which(human.counts < mouse.counts)]
-#human.cells <- unlist(lapply(human.cells, function(x){ toString(c("HUMAN",x))}))
-#mouse.cells <- unlist(lapply(mouse.cells, function(x){ toString(c("MOUSE",x))}))
-
-#colnames(mouse.cell.simData) <- mouse.cells
-#colnames(human.cell.simData) <- human.cells
-
-#local.means.human <- data.frame(colMeans(human.cell.simData))
-#names(local.means.human) <- c("colMeans")
-#rownames(local.means.human)[order(local.means.human$colMeans, decreasing = TRUE)[1:100]] -> selectedCells.human
-#local.means.mouse <- data.frame(colMeans(mouse.cell.simData))
-#names(local.means.mouse) <- c("colMeans")
-#rownames(local.means.mouse)[order(local.means.mouse$colMeans, decreasing = TRUE)[1:100]] -> selectedCells.mouse
-
-#simData.human <- human.cell.simData[,selectedCells.human]
-#simData.mouse <- mouse.cell.simData[,selectedCells.mouse]
-
-#simData <- cbind(simData.human, simData.mouse)
-
-#local.means.human <- data.frame(rowMeans(human.simData))
-#names(local.means.human) <- c("rowMeans")
-#rownames(local.means.human)[order(local.means.human$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.human
-#local.means.mouse <- data.frame(rowMeans(mouse.simData))
-#names(local.means.mouse) <- c("rowMeans")
-#rownames(local.means.mouse)[order(local.means.mouse$rowMeans, decreasing = TRUE)[1:100]] -> selectedGenes.mouse
-
-#simData.human <- simData[selectedGenes.human,]
-#simData.mouse <- simData[selectedGenes.mouse,]
-
-#simData <- rbind(simData.human,simData.mouse)
-
-#####
 
 
 #use simData for analysis of cells
