@@ -39,6 +39,7 @@ kknnImpute <- function(id, simData.learn, simData.test, kmaxParam=40, mixedSpeci
                      optimalK = trainingInfo$best.parameters$k,
                      optimalKernel = trainingInfo$best.parameter$kernel)
   if(TRUE == mixedSpeciesData) {
+    outputList$perc.human <- length(grep("HUMAN", rownames(simData.learn)[as.vector(r$C)]))/sum(dim(simData.learn))
     if(length(grep("HUMAN", id)) > 0) {
       zeroPredictions = sum(x$predicted[grep("MOUSE", rownames(simData.test))] == 0)
       outputList$mse = mean(x$predicted[grep("MOUSE", rownames(simData.test))])
