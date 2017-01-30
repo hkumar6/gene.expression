@@ -39,7 +39,22 @@ kknnImpute <- function(id, simData.learn, simData.test, kmaxParam=40, mixedSpeci
                      optimalK = trainingInfo$best.parameters$k,
                      optimalKernel = trainingInfo$best.parameter$kernel)
   if(TRUE == mixedSpeciesData) {
-    outputList$perc.human <- length(grep("HUMAN", rownames(simData.learn)[as.vector(r$C)]))/sum(dim(simData.learn))
+    # mixed neighbor ratio
+    # this measure indiactes whether the nearest neighbor graph has a member of the other species
+    mnr <- 0
+    if(trainingInfo$best.parameter$k > 1) {
+      for(i in 1:nrow(r$C)) {
+        if(length(grep("HUMAN", rownames(simData.test)[i])) > 0) {
+          t <- length(grep("MOUSE", rownames(simData.learn)[r$C[i,]]))/trainingInfo$best.parameters$k
+        }
+        else {
+          t <- length(grep("HUMAN", rownames(simData.learn)[r$C[i,]]))/trainingInfo$best.parameters$k
+        }
+        mnr <- mnr + t
+      }
+      mnr <- mnr/nrow(simData.test)
+    }
+    outputList$mnr <- mnr
     if(length(grep("HUMAN", id)) > 0) {
       zeroPredictions = sum(x$predicted[grep("MOUSE", rownames(simData.test))] == 0)
       outputList$mse = mean(x$predicted[grep("MOUSE", rownames(simData.test))])
