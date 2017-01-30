@@ -25,14 +25,14 @@ mixedSpeciesImput <- setClass("mixedSpeciesImput",
 
 # method to run simulations on genes with dependency on cells
 setGeneric(name = "mixedSpeciesGene",
-           def = function(theObject, mixedSpeciesdata) {
+           def = function(mixedSpeciesdata) {
              standardGeneric("mixedSpeciesGene")
            })
 
 setMethod(f = "mixedSpeciesGene",
-          signature = "mixedSpeciesImput",
-          definition = function(theObject, mixedSpeciesdata) {
-            
+          signature = "ANY",
+          definition = function(mixedSpeciesdata) {
+            theObject = mixedSpeciesImput()
             #Reduce Number of Cells
             #Seperate between human and mouse genes
             human.simData <- mixedSpeciesdata[grep("HUMAN",rownames(mixedSpeciesdata)),]
@@ -120,14 +120,14 @@ setMethod(f = "mixedSpeciesGene",
 
 # method to run simulations on cells with dependency on genes
 setGeneric(name = "mixedSpeciesCells",
-           def = function(theObject, mixedSpeciesdata) {
+           def = function(mixedSpeciesdata) {
              standardGeneric("mixedSpeciesCells")
            })
 
 setMethod(f = "mixedSpeciesCells",
-          signature = "mixedSpeciesImput",
-          definition = function(theObject, mixedSpeciesdata) {
-            
+          signature = "ANY",
+          definition = function(mixedSpeciesdata) {
+            theObject = mixedSpeciesImput()
             #Reduce Number of Cells
             #Seperate between human and mouse genes
             human.simData <- mixedSpeciesdata[grep("HUMAN",rownames(mixedSpeciesdata)),]
