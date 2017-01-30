@@ -27,6 +27,7 @@ Collate:
     'mixedSpeciesRandomForest.R'
     'dropoutSimulation.R'
     'mixedSpeciesImput.R'
+    'pbmcKknn.R'
     'pbmcClass.R'
 RoxygenNote: 5.0.1
 LazyData: true
