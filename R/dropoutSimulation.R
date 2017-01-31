@@ -129,6 +129,10 @@ setMethod(f = "simulateDropoutCells",
             # select 500 most abundantly expressed genes
             Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
             expressionData[local.selectedGenes, ] -> local.simData
+            mean <- apply(local.simData, 2, mean)
+            stdev <- apply(local.simData, 2, sd)
+            local.simData <- (local.simData - matrix(mean,nrow=nrow(local.simData),ncol=ncol(local.simData),byrow=TRUE))/matrix(stdev,nrow=nrow(local.simData),ncol=ncol(local.simData),byrow=TRUE)
+            
             colnames(local.simData) <- gsub("[_?]", "", gsub("^[0-9]", "X", colnames(local.simData), perl = TRUE), perl = TRUE)
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
