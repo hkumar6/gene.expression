@@ -18,13 +18,13 @@ kknn.pbmc <- function(id,simData){
   # define all non-zero entries as learn
   simData.learn <- simData[-c(which(simData[,id]==0)),,drop=FALSE]
   
-  outputVector <- t(rep(0, nrow(simData)))
-  outputVector[-c(which(simData[,id]==0))] <- simData.learn[-c(which(simData[,id]==0)),id,drop=FALSE]
+  outputVector <- simData[,id]
+  outputVector[-c(which(simData[,id]==0))] <- simData.learn[,id]
   
   if(nrow(simData.learn) > 3) {
     trainingInfo <- train.kknn(as.formula(paste(id, ".", sep = "~")), simData.learn, kernel = c("triangular", "rectangular", "epanechnikov", "optimal"), distance = 2)
     r <- kknn(as.formula(paste(id, ".", sep = "~")), simData.learn, simData.test, distance = 2, kernel = trainingInfo$best.parameters$kernel, k = trainingInfo$best.parameters$k)
-    outputVector[which(simData[,id]==0)] <- r$fittedValues
+    outputVector[which(simData[,id]==0)] <- r$fitted.values
   } else {
     outputVector[which(simData[,id]==0)] <- rep(0, nrow(simData.test))
   }
