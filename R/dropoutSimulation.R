@@ -44,7 +44,7 @@ DropoutSimulation <- setClass("DropoutSimulation",
 #' @docType methods
 #' @exportMethod simulateDropoutGene
 setGeneric(name = "simulateDropoutGene",
-           def = function(theObject, expressionData, dropoutPercentage, n) {
+           def = function(expressionData, dropoutPercentage, n) {
              standardGeneric("simulateDropoutGene")
            })
 
@@ -52,14 +52,19 @@ setGeneric(name = "simulateDropoutGene",
 #' @docType methods
 #' @export
 setMethod(f = "simulateDropoutGene",
-          signature = "DropoutSimulation",
-          definition = function(theObject, expressionData, dropoutPercentage, n) {
+          signature = "ANY",
+          definition = function(expressionData, dropoutPercentage, n) {
+            theObject <- DropoutSimulation()
             theObject@dropout.percentage <- dropoutPercentage
             theObject@n <- n
             
             # select 500 most abundantly expressed genes
             Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
             expressionData[local.selectedGenes, ] -> local.simData
+            mean <- apply(local.simData, 2, mean)
+            stdev <- apply(local.simData, 2, sd)
+            local.simData <- (local.simData - matrix(mean,nrow=nrow(local.simData),ncol=ncol(local.simData),byrow=TRUE))/matrix(stdev,nrow=nrow(local.simData),ncol=ncol(local.simData),byrow=TRUE)
+            
             for (p in theObject@dropout.percentage) {
               for (simID in 1:n) {
                 sample(colnames(expressionData), p*ncol(expressionData)) -> local.selectedCells
@@ -107,7 +112,7 @@ setMethod(f = "simulateDropoutGene",
 #' @docType methods
 #' @exportMethod simulateDropoutCells
 setGeneric(name = "simulateDropoutCells",
-           def = function(theObject, expressionData, dropoutPercentage, n) {
+           def = function(expressionData, dropoutPercentage, n) {
              standardGeneric("simulateDropoutCells")
            })
 
@@ -115,8 +120,9 @@ setGeneric(name = "simulateDropoutCells",
 #' @docType methods
 #' @export
 setMethod(f = "simulateDropoutCells",
-          signature = "DropoutSimulation",
-          definition = function(theObject, expressionData, dropoutPercentage, n) {
+          signature = "ANY",
+          definition = function(expressionData, dropoutPercentage, n) {
+            theObject <- DropoutSimulation()
             theObject@dropout.percentage <- dropoutPercentage
             theObject@n <- n
             
