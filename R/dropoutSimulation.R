@@ -16,9 +16,7 @@
 #' @rdname DropoutSimulation
 #' @importFrom methods new
 #' @exportClass DropoutSimulation
-#' 
-#' @examples
-#' t <- DropoutSimulation()
+
 
 DropoutSimulation <- setClass("DropoutSimulation",
                               slots = 
@@ -266,6 +264,8 @@ setGeneric(name = "plot.genes",
 
 #' @rdname DropoutSimulation
 #' @docType methods
+#' @importFrom stats cor
+#' @importFrom ggplot2 geom_point geom_line
 #' @export
 setMethod(f = "plot.genes",
           signature = "DropoutSimulation",

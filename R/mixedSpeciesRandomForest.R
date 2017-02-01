@@ -1,4 +1,17 @@
-
+#' randomForest imputation - single column
+#' 
+#' Impute results for a specific gene or cell using randomForest
+#' 
+#' @param id string for the cell or gene to impute, must be a column name in the data
+#' @param simData count data
+#' 
+#' @return data.frame containing results of the simulation
+#'      mean error
+#'
+#' @importFrom stats as.formula
+#' @importFrom randomForest randomForest
+#' @importFrom Hmisc rcorr
+#' @export
 
 randomForest.mixed.data <- function(id,simData){
 

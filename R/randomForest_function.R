@@ -1,4 +1,4 @@
-#' randonForest imputation
+#' randomForest imputation - single column
 #' 
 #' Impute results for a specific gene or cell using randomForest
 #' 
@@ -10,7 +10,7 @@
 #'      mean squared error, Spearman correlation
 #'
 #' @importFrom stats as.formula
-#' @importFrom randomForest train.randomForest
+#' @importFrom randomForest randomForest
 #' @importFrom Hmisc rcorr
 #' @export
 randomForestImpute <- function(id, simData.learn, simData.test, mixedSpeciesData = FALSE) {
