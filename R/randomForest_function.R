@@ -13,7 +13,7 @@
 #' @importFrom randomForest randomForest
 #' @importFrom Hmisc rcorr
 #' @export
-randomForestImpute <- function(id, simData.learn, simData.test, mixedSpeciesData = FALSE) {
+randomForestImpute <- function(id, simData.learn, simData.test, mixedSpeciesData = FALSE, predicted = FALSE) {
   takeout<-which(colnames(simData.learn)==id)
   # r <- randomForest(as.formula(paste(id, ".", sep = "~")), simData.learn[,-takeout],simData.learn[,id])
   r <- randomForest(simData.learn[,-takeout],simData.learn[,id])
@@ -21,6 +21,10 @@ randomForestImpute <- function(id, simData.learn, simData.test, mixedSpeciesData
   mse <- mean((simData.test[,id]-genePredict)^2)
   x <- data.frame(simData.test[,id])
   x$predicted = genePredict
+  
+  if(predicted) {
+    return(genePredict)
+  }
   
   if (dim(x)[1]>4){
     c <- rcorr(as.matrix(x), type = "spearman")

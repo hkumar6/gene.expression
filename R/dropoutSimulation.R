@@ -189,6 +189,8 @@ setGeneric(name = "plot.predict.gene",
 setMethod(f = "plot.predict.gene",
           signature = "ANY",
           definition = function(expressionData, drop.percent, geneID) {
+            plot.list = list()
+            
             Filter(function(x){ return(sum(expressionData[x,] == 0) == 0)}, rownames(expressionData)) -> local.selectedGenes
             expressionData[local.selectedGenes, ] -> local.simData
             sample(colnames(expressionData), drop.percent*ncol(expressionData)) -> local.selectedCells
@@ -198,9 +200,20 @@ setMethod(f = "plot.predict.gene",
                                            as.data.frame(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
                                            as.data.frame(t(local.simData[, local.selectedCells])), predicted = TRUE)
             plotData <- data.frame(original.values, predicted.values)
-            kknnPlot <- ggplot(plotData, aes(y=predicted.values, x=original.values, color=predicted.values)) + geom_point() + geom_line(aes(y=original.values))
-            kknnPlot <- kknnPlot + labs(title = paste("Predicted values for gene:", geneID, ", Dropout:", drop.percent, ", Method: kknn"))
-            return(kknnPlot)
+            kknnp <- ggplot(plotData, aes(y=predicted.values, x=original.values)) + geom_point() + geom_line(aes(y=original.values))
+            
+            predicted.values <- lassoImpute(geneID,
+                                            as.matrix(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
+                                            as.matrix(t(local.simData[, local.selectedCells])), TRUE)
+            plotData <- data.frame(original.values, predicted.values)
+            lasso <- ggplot(plotData, aes(y=predicted.values, x=original.values)) + geom_point() + geom_line(aes(y=original.values))
+            
+            predicted.values <- randomForestImpute(geneID,
+                                                   as.data.frame(t(local.simData[, -which(colnames(local.simData) %in% local.selectedCells)])),
+                                                   as.data.frame(t(local.simData[, local.selectedCells])), predicted = TRUE)
+            plotData <- data.frame(original.values, predicted.values)
+            rf <- ggplot(plotData, aes(y=predicted.values, x=original.values)) + geom_point() + geom_line(aes(y=original.values))
+            return(kknnp)
           })
 
 #' Analysis of simulation results for cells

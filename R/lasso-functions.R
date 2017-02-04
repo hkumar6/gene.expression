@@ -13,7 +13,7 @@
 #' @importFrom glmnet glmnet cv.glmnet
 #' @importFrom Hmisc rcorr
 #' @export
-lassoImpute <- function(ID, simData.learn, simData.test){
+lassoImpute <- function(ID, simData.learn, simData.test, returnPredict = FALSE){
   simData_learn <- simData.learn[,-c(which(colnames(simData.learn) == ID))]
   simData_test <- simData.test[,-c(which(colnames(simData.test) == ID))]
   vec.learn <- simData.learn[,which(colnames(simData.learn) == ID)]
@@ -26,6 +26,9 @@ lassoImpute <- function(ID, simData.learn, simData.test){
   Spear_corr <- c$r[1,2]
   cov <- sum(coef(fit.expr, CV.expr$lambda.min)>0)
   result <- data.frame(mse = mse, Spear_corr = Spear_corr, number.cov = cov)
+  if(returnPredict) {
+    return(predicted)
+  }
   return(result)
 }
 
